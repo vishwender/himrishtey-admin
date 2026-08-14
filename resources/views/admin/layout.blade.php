@@ -16,6 +16,9 @@
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet">
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         body {
@@ -101,6 +104,71 @@
                     Dashboard
                 </a>
 
+                {{-- Masters --}}
+                <div class="nav-group">
+
+                    <a
+                        href="#"
+                        class="nav-group-toggle
+        {{ request()->routeIs('admin.educations.*')
+            || request()->routeIs('admin.religions.*')
+            || request()->routeIs('admin.casts.*')
+            || request()->routeIs('admin.occupations.*')
+            ? 'active'
+            : '' }}">
+
+                        <i class="bi bi-database me-2"></i>
+                        Masters
+
+                        <i class="bi bi-chevron-down ms-auto"></i>
+
+                    </a>
+
+
+                    <div class="nav-submenu">
+
+                        <a
+                            href="{{ route('admin.religions.index') }}"
+                            class="{{ request()->routeIs('admin.religions.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-circle me-2"></i>
+                            Religions
+
+                        </a>
+
+
+                        <a
+                            href="{{ route('admin.casts.index') }}"
+                            class="{{ request()->routeIs('admin.casts.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-circle me-2"></i>
+                            Casts
+
+                        </a>
+
+
+                        <a
+                            href="{{ route('admin.educations.index') }}"
+                            class="{{ request()->routeIs('admin.educations.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-mortarboard me-2"></i>
+                            Education
+
+                        </a>
+
+
+                        <a
+                            href="{{ route('admin.occupations.index') }}"
+                            class="{{ request()->routeIs('admin.occupations.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-briefcase me-2"></i>
+                            Occupations
+
+                        </a>
+
+                    </div>
+
+                </div>
 
                 <a
                     href="{{ route('admin.members.index') }}"

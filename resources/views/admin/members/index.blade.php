@@ -743,17 +743,195 @@
                             </td>
 
 
-                            {{-- Action --}}
                             <td class="text-end">
 
-                                <a
-                                    href="{{ route('admin.members.show', ['id' => $member->id,'return' => request()->fullUrl(),]) }}"
-                                    class="btn btn-sm btn-primary">
+                                <div class="dropdown">
 
-                                    <i class="bi bi-eye me-1"></i>
-                                    View
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
 
-                                </a>
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                        Actions
+
+                                    </button>
+
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                                        {{-- View Profile --}}
+                                        <li>
+                                            <a
+                                                class="dropdown-item"
+                                                href="{{ route('admin.members.show', $member->id) }}">
+
+                                                <i class="bi bi-person me-2 text-primary"></i>
+                                                View Profile
+
+                                            </a>
+                                        </li>
+
+
+                                        {{-- Edit Profile --}}
+                                        <li>
+                                            <a
+                                                class="dropdown-item"
+                                                href="{{ route('admin.members.edit', $member->id) }}">
+
+                                                <i class="bi bi-pencil me-2 text-primary"></i>
+                                                Edit Profile
+
+                                            </a>
+                                        </li>
+
+
+                                        {{-- Activity --}}
+                                        <li>
+                                            <a
+                                                class="dropdown-item"
+                                                href="{{ route('admin.activities.member', [
+                        'memberId' => $member->id,
+                        'activity' => 'shortlisted'
+                    ]) }}">
+
+                                                <i class="bi bi-activity me-2 text-info"></i>
+                                                View Activity
+
+                                            </a>
+                                        </li>
+
+
+                                        {{-- Photos --}}
+                                        <li>
+                                            <a
+                                                class="dropdown-item"
+                                                href="{{ route('admin.members.show', $member->id) }}#gallery">
+
+                                                <i class="bi bi-images me-2 text-info"></i>
+                                                Manage Photos
+
+                                            </a>
+                                        </li>
+
+
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+
+
+                                        {{-- Trusted --}}
+                                        <li>
+
+                                            <form
+                                                action="{{ route('admin.members.toggle-trusted', $member->id) }}"
+                                                method="POST"
+                                                class="member-action-form"
+                                                data-confirm-title="Change Trusted Status"
+                                                data-confirm="Are you sure you want to change this member's trusted status?">
+
+                                                @csrf
+
+                                                <button type="submit" class="dropdown-item">
+                                                    @if($member->is_trusted === 'Yes')
+                                                    <i class="bi bi-patch-check-fill me-2 text-success"></i>
+                                                    Remove Trusted
+                                                    @else
+                                                    <i class="bi bi-patch-check me-2 text-success"></i>
+                                                    Mark as Trusted
+                                                    @endif
+                                                </button>
+
+                                            </form>
+
+                                        </li>
+
+
+                                        {{-- Promoted --}}
+                                        <li>
+
+                                            <form
+                                                action="{{ route('admin.members.toggle-promoted', $member->id) }}"
+                                                method="POST"
+                                                class="member-action-form"
+                                                data-confirm-title="Change Promotion Status"
+                                                data-confirm="Are you sure you want to change this member's promotion status?">
+
+                                                @csrf
+
+                                                <button type="submit" class="dropdown-item">
+                                                    @if($member->promoted === 'Yes')
+                                                    <i class="bi bi-star-fill me-2 text-warning"></i>
+                                                    Remove Promotion
+                                                    @else
+                                                    <i class="bi bi-star me-2 text-warning"></i>
+                                                    Promote Member
+                                                    @endif
+                                                </button>
+
+                                            </form>
+
+                                        </li>
+
+
+                                        {{-- Visibility --}}
+                                        <li>
+
+                                            <form
+                                                action="{{ route('admin.members.toggle-visibility', $member->id) }}"
+                                                method="POST"
+                                                class="member-action-form"
+                                                data-confirm-title="Change Profile Visibility"
+                                                data-confirm="Are you sure you want to change this member's profile visibility?">
+
+                                                @csrf
+
+                                                <button type="submit" class="dropdown-item">
+                                                    @if($member->profile_hide === 'Yes')
+                                                    <i class="bi bi-eye me-2 text-success"></i>
+                                                    Show Profile
+                                                    @else
+                                                    <i class="bi bi-eye-slash me-2 text-warning"></i>
+                                                    Hide Profile
+                                                    @endif
+                                                </button>
+
+                                            </form>
+
+                                        </li>
+
+
+                                        {{-- Active / Inactive --}}
+                                        <li>
+
+                                            <form
+                                                action="{{ route('admin.members.toggle-status', $member->id) }}"
+                                                method="POST"
+                                                class="member-action-form"
+                                                data-confirm-title="Change Member Status"
+                                                data-confirm="Are you sure you want to change this member's active status?">
+
+                                                @csrf
+
+                                                <button type="submit" class="dropdown-item">
+
+                                                    @if($member->active === 'Yes')
+                                                    <i class="bi bi-person-x me-2 text-danger"></i>
+                                                    Deactivate Member
+                                                    @else
+                                                    <i class="bi bi-person-check me-2 text-success"></i>
+                                                    Activate Member
+                                                    @endif
+
+                                                </button>
+
+                                            </form>
+
+                                        </li>
+
+                                    </ul>
+
+                                </div>
 
                             </td>
 
@@ -815,4 +993,213 @@
 
 </div>
 
+{{-- =========================================================
+    Member Action Confirmation Modal
+========================================================= --}}
+
+<div
+    class="modal fade"
+    id="memberActionModal"
+    tabindex="-1"
+    aria-labelledby="memberActionModalLabel"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title"
+                    id="memberActionModalLabel">
+
+                    Confirm Action
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="d-flex align-items-start">
+
+                    <div
+                        class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center me-3 flex-shrink-0"
+                        style="width:45px;height:45px;">
+
+                        <i class="bi bi-exclamation-triangle fs-5"></i>
+
+                    </div>
+
+                    <div>
+
+                        <p
+                            class="mb-0"
+                            id="memberActionModalMessage">
+
+                            Are you sure you want to perform this action?
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="memberActionConfirmBtn">
+
+                    Confirm
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        let selectedForm = null;
+
+        const modalElement = document.getElementById('memberActionModal');
+
+        const modal = new bootstrap.Modal(modalElement);
+
+        const titleElement = document.getElementById(
+            'memberActionModalLabel'
+        );
+
+        const messageElement = document.getElementById(
+            'memberActionModalMessage'
+        );
+
+        const confirmButton = document.getElementById(
+            'memberActionConfirmBtn'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Open Confirmation Modal
+        |--------------------------------------------------------------------------
+        */
+
+        document.querySelectorAll('.member-action-form').forEach(function(form) {
+
+            form.addEventListener('submit', function(event) {
+
+                event.preventDefault();
+
+                selectedForm = form;
+
+                const title =
+                    form.dataset.confirmTitle ||
+                    'Confirm Action';
+
+                const message =
+                    form.dataset.confirmMessage ||
+                    'Are you sure you want to perform this action?';
+
+
+                titleElement.textContent = title;
+
+                messageElement.textContent = message;
+
+
+                modal.show();
+
+            });
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Confirm Action
+        |--------------------------------------------------------------------------
+        */
+
+        confirmButton.addEventListener('click', function() {
+
+            if (!selectedForm) {
+                return;
+            }
+
+
+            /*
+            | Prevent double-clicks
+            */
+
+            confirmButton.disabled = true;
+
+            confirmButton.innerHTML = `
+            <span
+                class="spinner-border spinner-border-sm me-1"
+                role="status"
+                aria-hidden="true">
+            </span>
+
+            Processing...
+        `;
+
+
+            /*
+            | Submit original form
+            */
+
+            selectedForm.submit();
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset Modal
+        |--------------------------------------------------------------------------
+        */
+
+        modalElement.addEventListener('hidden.bs.modal', function() {
+
+            selectedForm = null;
+
+            confirmButton.disabled = false;
+
+            confirmButton.innerHTML = 'Confirm';
+
+        });
+
+    });
+</script>
+@endpush
