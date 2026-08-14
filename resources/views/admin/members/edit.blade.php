@@ -79,7 +79,7 @@
             Basic Information
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -259,7 +259,7 @@
             Religion & Community
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -375,7 +375,7 @@
             Education
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -445,7 +445,7 @@
             Career
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -575,7 +575,7 @@
             Location
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -676,7 +676,7 @@
             Family
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -821,7 +821,7 @@
             Lifestyle
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -921,7 +921,7 @@
             Admin / Membership
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white">
 
@@ -1692,5 +1692,39 @@
     </form>
 
 </div>
+
+@push('styles')
+<style>
+    .member-section .card-header {
+        padding: 1.5rem 1.5rem 0;
+        background: #fff;
+        border: 0;
+    }
+
+    .member-section .card-header h5 {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+
+    .member-section .card-header h5 > i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        margin-right: 1rem !important;
+        border-radius: 50%;
+        background: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+        font-size: 1.15rem;
+    }
+
+    .member-section .card-body {
+        padding: 1.5rem;
+    }
+</style>
+@endpush
 
 @endsection

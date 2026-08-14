@@ -2,6 +2,40 @@
 
 @section('content')
 
+@push('styles')
+<style>
+    .member-profile-section .card-header {
+        padding: 1.5rem 1.5rem 0;
+        background: #fff;
+        border: 0;
+    }
+
+    .member-profile-section .card-header h5 {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+
+    .member-profile-section .card-header h5 > i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        margin-right: 1rem !important;
+        border-radius: 50%;
+        background: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+        font-size: 1.15rem;
+    }
+
+    .member-profile-section .card-body {
+        padding: 1.5rem;
+    }
+</style>
+@endpush
+
 @if(session('success'))
 
 <div class="alert alert-success alert-dismissible fade show">
@@ -620,11 +654,12 @@
 
 
     {{-- Basic Information --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header bg-white py-3">
+        <div class="card-header">
 
             <h5 class="mb-0">
+                <i class="bi bi-person me-2"></i>
                 Basic Information
             </h5>
 
@@ -758,10 +793,11 @@
     </div>
 
     {{-- About Me --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header bg-white py-3">
+        <div class="card-header">
             <h5 class="mb-0">
+                <i class="bi bi-chat-heart me-2"></i>
                 About Me
             </h5>
         </div>
@@ -788,11 +824,12 @@
 
 
     {{-- Education & Career --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header bg-white py-3">
+        <div class="card-header">
 
             <h5 class="mb-0">
+                <i class="bi bi-mortarboard me-2"></i>
                 Education & Career
             </h5>
 
@@ -944,11 +981,12 @@
 
 
     {{-- Location --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header bg-white py-3">
+        <div class="card-header">
 
             <h5 class="mb-0">
+                <i class="bi bi-geo-alt me-2"></i>
                 Location
             </h5>
 
@@ -1029,10 +1067,13 @@
     </div>
 
     {{-- Family Information --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0">Family Information</h5>
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-house-heart me-2"></i>
+                Family Information
+            </h5>
         </div>
 
         <div class="card-body">
@@ -1113,10 +1154,13 @@
     </div>
 
     {{-- Lifestyle --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0">Lifestyle & Health</h5>
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-person-lines-fill me-2"></i>
+                Lifestyle & Health
+            </h5>
         </div>
 
         <div class="card-body">
@@ -1161,20 +1205,37 @@
 
     </div>
     {{-- Partner Preferences --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 member-partner-preferences">
 
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0">Partner Preferences</h5>
+        <div class="card-header bg-white border-0 pt-4 px-4">
+
+            <div class="d-flex align-items-center">
+
+                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3"
+                    style="width:42px;height:42px;">
+                    <i class="bi bi-heart fs-5"></i>
+                </div>
+
+                <div>
+                    <h5 class="mb-1">Partner Preferences</h5>
+                    <small class="text-muted">
+                        Preferences for the member's desired partner
+                    </small>
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="card-body">
+        <div class="card-body px-4 pb-4">
 
             {{-- Basic Preferences --}}
-            <h6 class="fw-semibold mb-3">
+            <h6 class="text-primary border-bottom pb-2 mb-3">
+                <i class="bi bi-person-heart me-2"></i>
                 Basic Preferences
             </h6>
 
-            <div class="row">
+            <div class="row g-3">
 
                 <div class="col-md-4 mb-3">
                     <small class="text-muted d-block">
@@ -1206,15 +1267,13 @@
             </div>
 
 
-            <hr class="my-4">
-
-
             {{-- Religion & Background --}}
-            <h6 class="fw-semibold mb-3">
+            <h6 class="text-primary border-bottom pb-2 mb-3 mt-5">
+                <i class="bi bi-stars me-2"></i>
                 Religion & Background
             </h6>
 
-            <div class="row">
+            <div class="row g-3">
 
                 <div class="col-md-4 mb-3">
                     <small class="text-muted d-block">
@@ -1264,15 +1323,13 @@
             </div>
 
 
-            <hr class="my-4">
-
-
             {{-- Education & Career --}}
-            <h6 class="fw-semibold mb-3">
+            <h6 class="text-primary border-bottom pb-2 mb-3 mt-5">
+                <i class="bi bi-mortarboard me-2"></i>
                 Education & Career
             </h6>
 
-            <div class="row">
+            <div class="row g-3">
 
                 <div class="col-md-4 mb-3">
                     <small class="text-muted d-block">
@@ -1313,15 +1370,13 @@
             </div>
 
 
-            <hr class="my-4">
-
-
             {{-- Height & Location --}}
-            <h6 class="fw-semibold mb-3">
+            <h6 class="text-primary border-bottom pb-2 mb-3 mt-5">
+                <i class="bi bi-geo-alt me-2"></i>
                 Height & Location
             </h6>
 
-            <div class="row">
+            <div class="row g-3">
 
                 <div class="col-md-3 mb-3">
                     <small class="text-muted d-block">
@@ -1362,15 +1417,13 @@
             </div>
 
 
-            <hr class="my-4">
-
-
             {{-- Lifestyle Preferences --}}
-            <h6 class="fw-semibold mb-3">
+            <h6 class="text-primary border-bottom pb-2 mb-3 mt-5">
+                <i class="bi bi-cup-hot me-2"></i>
                 Lifestyle Preferences
             </h6>
 
-            <div class="row">
+            <div class="row g-3">
 
                 <div class="col-md-4 mb-3">
                     <small class="text-muted d-block">
@@ -1402,11 +1455,9 @@
             </div>
 
 
-            <hr class="my-4">
-
-
             {{-- About Partner --}}
-            <h6 class="fw-semibold mb-3">
+            <h6 class="text-primary border-bottom pb-2 mb-3 mt-5">
+                <i class="bi bi-chat-heart me-2"></i>
                 About Desired Partner
             </h6>
 

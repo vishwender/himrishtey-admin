@@ -21,6 +21,9 @@ use App\Http\Controllers\Admin\HeightController;
 use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\StateController;
 use App\Http\Controllers\Admin\CityController;
+use App\Http\Controllers\Admin\MembershipTypeController;
+use App\Http\Controllers\Admin\MembershipPlanController;
+use App\Http\Controllers\Admin\PageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -529,6 +532,56 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 '/cities/{id}',
                 [CityController::class, 'destroy']
             )->name('cities.destroy');
+
+            Route::get(
+                '/membership-types',
+                [MembershipTypeController::class, 'index']
+            )->name('membership-types.index');
+
+            Route::post(
+                '/membership-types',
+                [MembershipTypeController::class, 'store']
+            )->name('membership-types.store');
+
+            Route::put(
+                '/membership-types/{id}',
+                [MembershipTypeController::class, 'update']
+            )->name('membership-types.update');
+
+            Route::delete(
+                '/membership-types/{id}',
+                [MembershipTypeController::class, 'destroy']
+            )->name('membership-types.destroy');
+
+            Route::get(
+                '/membership-plans',
+                [MembershipPlanController::class, 'index']
+            )->name('membership-plans.index');
+
+            Route::post(
+                '/membership-plans',
+                [MembershipPlanController::class, 'store']
+            )->name('membership-plans.store');
+
+            Route::put(
+                '/membership-plans/{id}',
+                [MembershipPlanController::class, 'update']
+            )->name('membership-plans.update');
+
+            Route::delete(
+                '/membership-plans/{id}',
+                [MembershipPlanController::class, 'destroy']
+            )->name('membership-plans.destroy');
+
+            Route::get(
+                '/pages',
+                [PageController::class, 'index']
+            )->name('pages.index');
+
+            Route::put(
+                '/pages',
+                [PageController::class, 'update']
+            )->name('pages.update');
         });
     });
 });

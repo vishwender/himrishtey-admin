@@ -2,6 +2,19 @@
 
 @section('title', 'Dashboard')
 
+@push('styles')
+<style>
+    .dashboard-site-card { background: linear-gradient(110deg, #fff 0%, #f5f2ff 100%); }
+    .dashboard-stat { overflow: hidden; position: relative; }
+    .dashboard-stat .stat-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; font-size: 1.25rem; }
+    .dashboard-stat .stat-icon.members { background: #eeeaff; color: #6d4aff; }
+    .dashboard-stat .stat-icon.active { background: #e3f9ed; color: #18864b; }
+    .dashboard-stat .stat-icon.inactive { background: #fff2df; color: #ca7515; }
+    .dashboard-stat .stat-icon.payments { background: #e4f4ff; color: #1672bd; }
+    .dashboard-stat h3 { font-size: 2rem; font-weight: 700; letter-spacing: -.04em; }
+</style>
+@endpush
+
 @section('content')
 
 @php
@@ -35,7 +48,7 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
     {{-- Current Site --}}
     @if($currentSite)
 
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 dashboard-site-card">
 
         <div class="card-body">
 
@@ -108,12 +121,13 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
         {{-- Members --}}
         <div class="col-md-6 col-xl-3">
 
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100 dashboard-stat">
 
                 <div class="card-body">
 
-                    <div class="text-muted mb-2">
-                        Members
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">Members</div>
+                        <span class="stat-icon members"><i class="bi bi-people"></i></span>
                     </div>
 
                     <h3 class="mb-0">
@@ -130,12 +144,13 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
         {{-- Active Members --}}
         <div class="col-md-6 col-xl-3">
 
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100 dashboard-stat">
 
                 <div class="card-body">
 
-                    <div class="text-muted mb-2">
-                        Active Members
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">Active Members</div>
+                        <span class="stat-icon active"><i class="bi bi-person-check"></i></span>
                     </div>
 
                     <h3 class="mb-0">
@@ -152,12 +167,13 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
         {{-- Pending Profiles --}}
         <div class="col-md-6 col-xl-3">
 
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100 dashboard-stat">
 
                 <div class="card-body">
 
-                    <div class="text-muted mb-2">
-                        Inactive Profiles
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">Inactive Profiles</div>
+                        <span class="stat-icon inactive"><i class="bi bi-person-dash"></i></span>
                     </div>
 
                     <h3 class="mb-0">
@@ -174,12 +190,13 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
         {{-- Payments --}}
         <div class="col-md-6 col-xl-3">
 
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm h-100 dashboard-stat">
 
                 <div class="card-body">
 
-                    <div class="text-muted mb-2">
-                        Payments
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">Payments</div>
+                        <span class="stat-icon payments"><i class="bi bi-credit-card"></i></span>
                     </div>
 
                     <h3 class="mb-0">
