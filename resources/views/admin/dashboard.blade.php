@@ -3,16 +3,7 @@
 @section('title', 'Dashboard')
 
 @push('styles')
-<style>
-    .dashboard-site-card { background: linear-gradient(110deg, #fff 0%, #f5f2ff 100%); }
-    .dashboard-stat { overflow: hidden; position: relative; }
-    .dashboard-stat .stat-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; font-size: 1.25rem; }
-    .dashboard-stat .stat-icon.members { background: #eeeaff; color: #6d4aff; }
-    .dashboard-stat .stat-icon.active { background: #e3f9ed; color: #18864b; }
-    .dashboard-stat .stat-icon.inactive { background: #fff2df; color: #ca7515; }
-    .dashboard-stat .stat-icon.payments { background: #e4f4ff; color: #1672bd; }
-    .dashboard-stat h3 { font-size: 2rem; font-weight: 700; letter-spacing: -.04em; }
-</style>
+<link rel="stylesheet" href="{{ asset('admin/css/dashboard.css') }}">
 @endpush
 
 @section('content')

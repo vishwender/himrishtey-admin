@@ -24,7 +24,7 @@ use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\MembershipTypeController;
 use App\Http\Controllers\Admin\MembershipPlanController;
 use App\Http\Controllers\Admin\PageController;
-
+use App\Http\Controllers\Admin\UserRatingController;
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
@@ -582,6 +582,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 '/pages',
                 [PageController::class, 'update']
             )->name('pages.update');
+
+            Route::get('/user-ratings', [UserRatingController::class, 'index'])
+                ->name('user-ratings.index');
+
+            Route::get('/user-ratings/{id}', [UserRatingController::class, 'show'])
+                ->name('user-ratings.show');
+
+            Route::delete('/user-ratings/{id}', [UserRatingController::class, 'destroy'])
+                ->name('user-ratings.destroy');
         });
     });
 });

@@ -17,7 +17,7 @@ class SiteSeeder extends Seeder
 
                 'database_host' => env('SITE_DB_HOST', 'db'),
                 'database_port' => env('SITE_DB_PORT', '3306'),
-                'database_name' => 'himrishety_main',
+                'database_name' => 'himrishtey_main',
                 'database_username' => env('SITE_DB_USERNAME', 'db'),
                 'database_password' => env('SITE_DB_PASSWORD', 'db'),
 

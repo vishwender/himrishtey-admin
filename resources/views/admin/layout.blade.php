@@ -23,218 +23,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --app-primary: #6d4aff;
-            --app-primary-dark: #5132d5;
-            --app-ink: #20243a;
-            --app-muted: #78809a;
-            --app-surface: #ffffff;
-            --app-canvas: #f6f7fc;
-            --app-border: #e9eaf2;
-        }
-
-        body {
-            min-width: 320px;
-            background: var(--app-canvas);
-            color: var(--app-ink);
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        h1, h2, h3, h4, h5, h6, .topbar strong {
-            font-family: 'Outfit', sans-serif;
-            color: var(--app-ink);
-        }
-
-        .admin-wrapper { min-height: 100vh; }
-
-        .sidebar {
-            position: sticky;
-            top: 0;
-            width: 268px;
-            height: 100vh;
-            flex: 0 0 268px;
-            overflow-y: auto;
-            background: linear-gradient(180deg, #242a4d 0%, #171b36 100%);
-            color: #fff;
-            box-shadow: 10px 0 30px rgba(27, 31, 66, .08);
-        }
-
-        .sidebar .brand {
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            padding: 24px 22px;
-            background: rgba(36, 42, 77, .96);
-            border-bottom: 1px solid rgba(255, 255, 255, .09);
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 700;
-            letter-spacing: -.02em;
-        }
-
-        .sidebar .brand::before {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            margin-right: 10px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #9b7cff, #6d4aff);
-            content: '♥';
-            font-family: Arial, sans-serif;
-            font-size: 15px;
-        }
-
-        .sidebar nav { padding: 10px 12px; }
-
-        .sidebar a,
-        .nav-group-toggle,
-        .nav-dropdown-toggle {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            margin: 2px 0;
-            padding: 11px 12px;
-            border: 0;
-            border-radius: 10px;
-            background: transparent;
-            color: #bfc5dd;
-            cursor: pointer;
-            font: 500 .9rem 'DM Sans', sans-serif;
-            text-align: left;
-            text-decoration: none;
-            transition: background .2s ease, color .2s ease, transform .2s ease;
-        }
-
-        .sidebar a > .bi:not(.bi-chevron-down),
-        .nav-group-toggle > .bi:not(.bi-chevron-down),
-        .nav-dropdown-toggle > .bi:not(.bi-chevron-down) {
-            width: 22px;
-            margin-right: 8px !important;
-            font-size: 1rem;
-            text-align: center;
-        }
-
-        .sidebar a:hover,
-        .sidebar a.active,
-        .nav-group-toggle:hover,
-        .nav-group-toggle.active,
-        .nav-dropdown-toggle:hover,
-        .nav-dropdown-toggle.active {
-            background: rgba(151, 124, 255, .16);
-            color: #fff;
-        }
-
-        .sidebar a.active { box-shadow: inset 3px 0 0 #a78bfa; }
-
-        .nav-group-toggle .bi-chevron-down,
-        .nav-dropdown-toggle .bi-chevron-down { transition: transform .2s ease; }
-
-        .nav-group.is-open .bi-chevron-down,
-        .nav-dropdown.is-open .bi-chevron-down { transform: rotate(180deg); }
-
-        .nav-submenu, .nav-dropdown-menu { display: none; }
-        .nav-group.is-open .nav-submenu,
-        .nav-dropdown.is-open .nav-dropdown-menu { display: block; }
-
-        .nav-submenu a, .nav-dropdown-menu a {
-            padding-left: 28px;
-            color: #aeb5d2;
-            font-size: .84rem;
-        }
-
-        .sidebar .mt-4 { padding: 8px 12px 22px; }
-        .sidebar .btn-link { width: 100%; border-radius: 10px; text-align: left; }
-
-        .main-wrapper { min-width: 0; flex: 1; }
-
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            padding: 14px 32px;
-            background: rgba(255, 255, 255, .88);
-            border-bottom: 1px solid var(--app-border);
-            backdrop-filter: blur(16px);
-        }
-
-        .topbar strong { font-size: 1.05rem; }
-        .content { padding: 32px; }
-
-        .card {
-            border: 1px solid var(--app-border) !important;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(32, 36, 58, .045) !important;
-        }
-
-        .card-header { border-color: var(--app-border); }
-        .card-body { padding: 1.5rem; }
-
-        .btn {
-            border-radius: 9px;
-            font-weight: 600;
-            padding: .56rem 1rem;
-            transition: transform .18s ease, box-shadow .18s ease;
-        }
-
-        .btn:hover { transform: translateY(-1px); }
-        .btn-primary {
-            border-color: var(--app-primary);
-            background: linear-gradient(135deg, #8063ff, #6040ed);
-            box-shadow: 0 6px 14px rgba(96, 64, 237, .2);
-        }
-        .btn-primary:hover, .btn-primary:focus {
-            border-color: var(--app-primary-dark);
-            background: linear-gradient(135deg, #7151f8, #5132d5);
-        }
-
-        .form-control, .form-select, .input-group-text {
-            min-height: 42px;
-            border-color: #dfe2ec;
-            border-radius: 9px;
-            color: var(--app-ink);
-        }
-        .input-group > .form-control { border-radius: 0 9px 9px 0; }
-        .input-group > .input-group-text { border-radius: 9px 0 0 9px; background: #f8f8fc; }
-        .form-control:focus, .form-select:focus {
-            border-color: #9a86ff;
-            box-shadow: 0 0 0 .22rem rgba(109, 74, 255, .12);
-        }
-        .form-label { margin-bottom: .45rem; font-size: .875rem; font-weight: 600; }
-
-        .table { --bs-table-bg: transparent; --bs-table-hover-bg: #fafaff; }
-        .table > :not(caption) > * > * { padding: .9rem 1rem; border-color: var(--app-border); }
-        .table thead th { color: #68708a; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-        .badge { border-radius: 7px; font-weight: 600; }
-        .alert { border: 0; border-radius: 12px; }
-        .pagination { margin-bottom: 0; }
-        .pagination svg { width: 1rem !important; height: 1rem !important; }
-        .page-link { border-color: var(--app-border); color: var(--app-primary); }
-        .page-item.active .page-link { border-color: var(--app-primary); background-color: var(--app-primary); }
-
-        @media (max-width: 991.98px) {
-            .sidebar { width: 220px; flex-basis: 220px; }
-            .topbar, .content { padding-left: 20px; padding-right: 20px; }
-        }
-
-        @media (max-width: 767.98px) {
-            .admin-wrapper { display: block !important; }
-            .sidebar { position: relative; width: 100%; height: auto; min-height: 0; overflow: visible; }
-            .sidebar .brand { position: relative; }
-            .sidebar nav { display: flex; overflow-x: auto; padding: 8px; }
-            .sidebar nav > a, .sidebar nav > div { flex: 0 0 auto; }
-            .sidebar .mt-4 { display: none; }
-            .topbar { position: relative; padding: 14px 16px; }
-            .topbar .d-flex { gap: 12px; align-items: flex-start !important; flex-direction: column; }
-            .content { padding: 20px 16px; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{asset('admin/css/admin.css') }}">
+    <script src="{{asset('admin/js/admin.js')}}"></script>
 
     @stack('styles')
 
 </head>
+@php
+$currentSite = app(\App\Services\SiteManager::class)->current();
+@endphp
 
 <body>
 
@@ -244,7 +41,7 @@
         <aside class="sidebar">
 
             <div class="brand">
-                Matrimonial Admin
+                {{$currentSite->name}} Admin
             </div>
 
 
@@ -473,6 +270,15 @@
 
                 </a>
 
+                <a href="{{ route('admin.user-ratings.index') }}"
+                    class="{{ request()->routeIs('admin.user-ratings.*') ? 'active' : '' }}">
+
+                    <i class="bi bi-star"></i>
+
+                    <span>User Ratings</span>
+
+                </a>
+
 
                 <a href="#">
                     <i class="bi bi-credit-card me-2"></i>
@@ -572,7 +378,9 @@
                             class="btn btn-sm btn-outline-primary">
                             Switch Site
                         </a>
-
+                        <button type="button" id="themeToggle" class="btn btn-light theme-toggle" aria-label="Toggle dark mode">
+                            <i class="bi bi-moon"></i>
+                        </button>
 
                         <span>
                             {{ auth('admin')->user()->name }}
@@ -602,8 +410,8 @@
 
     <script>
         document.querySelectorAll('.nav-group-toggle, .nav-dropdown-toggle')
-            .forEach(function (toggle) {
-                toggle.addEventListener('click', function () {
+            .forEach(function(toggle) {
+                toggle.addEventListener('click', function() {
                     const menu = this.closest('.nav-group, .nav-dropdown');
                     const isOpen = menu.classList.toggle('is-open');
 
