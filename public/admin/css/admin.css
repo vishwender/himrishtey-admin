@@ -631,3 +631,59 @@ h6,
         padding: 20px 16px;
     }
 }
+
+/* =========================================================
+   CKEDITOR
+   ========================================================= */
+
+.ck-editor__editable {
+    min-height: 260px;
+}
+
+.ck.ck-editor {
+    width: 100%;
+}
+
+.ck.ck-toolbar {
+    border-color: var(--app-border) !important;
+}
+
+.ck.ck-editor__main>.ck-editor__editable {
+    border-color: var(--app-border) !important;
+    background: var(--app-surface);
+    color: var(--app-ink);
+}
+
+.ck.ck-editor__main>.ck-editor__editable:focus {
+    border-color: #9a86ff !important;
+    box-shadow: 0 0 0 .22rem rgba(109, 74, 255, .12);
+}
+
+/* CKEditor dark mode */
+
+[data-theme="dark"] .ck.ck-toolbar {
+    background: #20253a;
+    border-color: #3a4058 !important;
+}
+
+[data-theme="dark"] .ck.ck-editor__main>.ck-editor__editable {
+    background: #252a40;
+    border-color: #3a4058 !important;
+    color: #f1f2f8;
+}
+
+[data-theme="dark"] .ck.ck-button,
+[data-theme="dark"] .ck.ck-button .ck-icon {
+    color: #d9dced;
+}
+
+[data-theme="dark"] .ck.ck-button:hover,
+[data-theme="dark"] .ck.ck-button:focus,
+[data-theme="dark"] .ck.ck-button.ck-on {
+    background: #303650;
+}
+
+[data-theme="dark"] .ck.ck-dropdown__panel {
+    background: #20253a;
+    border-color: #3a4058;
+}

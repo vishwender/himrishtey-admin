@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\MembershipTypeController;
 use App\Http\Controllers\Admin\MembershipPlanController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\UserRatingController;
+use App\Http\Controllers\Admin\SuccessStoryController;
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
@@ -591,6 +592,44 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::delete('/user-ratings/{id}', [UserRatingController::class, 'destroy'])
                 ->name('user-ratings.destroy');
+
+            Route::prefix('success-stories')->name('success-stories.')->group(function () {
+
+                Route::get('/', [
+                    SuccessStoryController::class,
+                    'index'
+                ])->name('index');
+
+                Route::get('/create', [
+                    SuccessStoryController::class,
+                    'create'
+                ])->name('create');
+
+                Route::post('/', [
+                    SuccessStoryController::class,
+                    'store'
+                ])->name('store');
+
+                Route::get('/{id}/edit', [
+                    SuccessStoryController::class,
+                    'edit'
+                ])->name('edit');
+
+                Route::put('/{id}', [
+                    SuccessStoryController::class,
+                    'update'
+                ])->name('update');
+
+                Route::delete('/{id}', [
+                    SuccessStoryController::class,
+                    'destroy'
+                ])->name('destroy');
+
+                Route::patch('/{id}/status', [
+                    SuccessStoryController::class,
+                    'status'
+                ])->name('status');
+            });
         });
     });
 });

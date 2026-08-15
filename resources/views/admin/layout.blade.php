@@ -279,10 +279,11 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                 </a>
 
-
-                <a href="#">
-                    <i class="bi bi-credit-card me-2"></i>
-                    Payments
+                {{-- Success Stories --}}
+                <a href="{{ route('admin.success-stories.index') }}"
+                    class="{{ request()->routeIs('admin.success-stories.*') ? 'active' : '' }}">
+                    <i class="bi bi-heart-fill"></i>
+                    <span>Success Stories</span>
                 </a>
 
 
