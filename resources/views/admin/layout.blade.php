@@ -383,8 +383,8 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                     <div class="nav-submenu">
 
                         <a
-                            href=""
-                            class="">
+                            href="{{ route('admin.blog-posts.index') }}"
+                            class="{{ request()->routeIs('admin.blog-posts.*') ? 'active' : '' }}">
 
                             <i class="bi bi-journal-text"></i>
 
