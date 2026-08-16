@@ -156,4 +156,28 @@ class OccupationController extends Controller
                 'Occupation status updated successfully.'
             );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy($id)
+    {
+        $occupation = Occupation::find($id);
+
+        if (!$occupation) {
+            abort(404, 'Occupation not found.');
+        }
+
+        $occupation->delete();
+
+        return redirect()
+            ->route('admin.occupations.index')
+            ->with(
+                'success',
+                'Occupation deleted successfully.'
+            );
+    }
 }

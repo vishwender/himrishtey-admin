@@ -286,6 +286,70 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                     <span>Success Stories</span>
                 </a>
 
+                {{-- Staff Management --}}
+                <div class="nav-group {{ request()->routeIs('admin.staff-users.*', 'admin.roles.*', 'admin.permissions.*') ? 'is-open' : '' }}">
+
+                    <button
+                        type="button"
+                        class="nav-group-toggle {{ request()->routeIs('admin.staff-users.*', 'admin.roles.*', 'admin.permissions.*') ? 'active' : '' }}">
+
+                        <i class="bi bi-people"></i>
+
+                        <span class="flex-grow-1">
+                            Staff Management
+                        </span>
+
+                        <i class="bi bi-chevron-down"></i>
+
+                    </button>
+
+
+                    <div class="nav-submenu">
+
+                        {{-- Staff Users --}}
+                        <a
+                            href="{{ route('admin.staff-users.index') }}"
+                            class="{{ request()->routeIs('admin.staff-users.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-person-badge"></i>
+
+                            <span>
+                                Staff Users
+                            </span>
+
+                        </a>
+
+
+                        {{-- Roles --}}
+                        <a
+                            href="{{ route('admin.roles.index') }}"
+                            class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-person-gear"></i>
+
+                            <span>
+                                Roles
+                            </span>
+
+                        </a>
+
+
+                        {{-- Permissions --}}
+                        <a
+                            href="{{ route('admin.permissions.index') }}"
+                            class="{{ request()->routeIs('admin.permissions.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-shield-check"></i>
+
+                            <span>
+                                Permissions
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                </div>
 
                 <a href="#">
                     <i class="bi bi-person-badge me-2"></i>
@@ -299,10 +363,40 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                 </a>
 
 
-                <a href="#">
-                    <i class="bi bi-journal-text me-2"></i>
-                    Content
-                </a>
+                {{-- Content Management --}}
+                <div class="nav-group">
+
+                    <button
+                        type="button"
+                        class="nav-group-toggle">
+
+                        <i class="bi bi-file-earmark-text"></i>
+
+                        <span class="flex-grow-1">
+                            Content Management
+                        </span>
+
+                        <i class="bi bi-chevron-down"></i>
+
+                    </button>
+
+                    <div class="nav-submenu">
+
+                        <a
+                            href=""
+                            class="">
+
+                            <i class="bi bi-journal-text"></i>
+
+                            <span>
+                                Blogs
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                </div>
 
 
                 <a href="#">

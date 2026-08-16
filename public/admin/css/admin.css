@@ -687,3 +687,141 @@ h6,
     background: #20253a;
     border-color: #3a4058;
 }
+
+/* =========================================================
+   STAFF USERS
+   ========================================================= */
+
+.staff-users-card {
+    overflow: hidden;
+}
+
+.staff-users-table th {
+    white-space: nowrap;
+}
+
+.staff-users-table td {
+    vertical-align: middle;
+}
+
+.staff-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #8063ff, #6040ed);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.staff-profile-id {
+    display: inline-block;
+    padding: .25rem .5rem;
+    border-radius: 6px;
+    background: #f1efff;
+    color: var(--app-primary);
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.staff-status-active,
+.staff-status-inactive {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: .4rem .65rem;
+}
+
+.staff-status-active {
+    background: #e3f9ed;
+    color: #18864b;
+}
+
+.staff-status-inactive {
+    background: #fff0f0;
+    color: #c43d3d;
+}
+
+.staff-status-active > span,
+.staff-status-inactive > span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.staff-users-empty {
+    min-height: 300px;
+}
+
+.staff-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: #eeeaff;
+    color: var(--app-primary);
+    font-size: 1.6rem;
+}
+
+.staff-role-option {
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--app-border);
+    border-radius: 10px;
+    transition: border-color .2s ease, background .2s ease;
+}
+
+.staff-role-option:hover {
+    border-color: #b8aaff;
+    background: rgba(109, 74, 255, .035);
+}
+
+.staff-role-option .form-check-input {
+    margin-top: .35rem;
+}
+
+.staff-role-option .form-check-label {
+    cursor: pointer;
+    padding-left: 4px;
+}
+
+/* =========================================================
+   STAFF USERS - DARK MODE
+   ========================================================= */
+
+[data-theme="dark"] .staff-profile-id {
+    background: #292447;
+    color: #b7a8ff;
+}
+
+[data-theme="dark"] .staff-status-active {
+    background: #173b2b;
+    color: #5edb98;
+}
+
+[data-theme="dark"] .staff-status-inactive {
+    background: #402527;
+    color: #ff8585;
+}
+
+[data-theme="dark"] .staff-empty-icon {
+    background: #292447;
+    color: #b7a8ff;
+}
+
+[data-theme="dark"] .staff-role-option {
+    border-color: var(--app-border);
+}
+
+[data-theme="dark"] .staff-role-option:hover {
+    border-color: #6654ad;
+    background: rgba(109, 74, 255, .08);
+}

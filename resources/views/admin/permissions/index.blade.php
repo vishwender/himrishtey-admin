@@ -12,9 +12,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
 
                 <div>
-                    <h5 class="mb-1">
-                        Religions
-                    </h5>
+                    <h5 class="mb-1">Permissions</h5>
 
                     <div
                         class="border-bottom"
@@ -26,21 +24,20 @@
                     type="button"
                     class="btn btn-primary"
                     data-bs-toggle="modal"
-                    data-bs-target="#addReligionModal">
+                    data-bs-target="#addPermissionModal">
 
                     <i class="bi bi-plus-lg me-1"></i>
-                    Add Religion
+                    Add Permission
 
                 </button>
 
             </div>
 
 
-            {{-- Success Message --}}
+            {{-- Success --}}
             @if(session('success'))
 
-            <div
-                class="alert alert-success alert-dismissible fade show">
+            <div class="alert alert-success alert-dismissible fade show">
 
                 <i class="bi bi-check-circle me-2"></i>
 
@@ -57,13 +54,12 @@
             @endif
 
 
-            {{-- Error Message --}}
+            {{-- Error --}}
             @if(session('error'))
 
-            <div
-                class="alert alert-danger alert-dismissible fade show">
+            <div class="alert alert-danger alert-dismissible fade show">
 
-                <i class="bi bi-exclamation-triangle me-2"></i>
+                <i class="bi bi-exclamation-circle me-2"></i>
 
                 {{ session('error') }}
 
@@ -81,16 +77,13 @@
             {{-- Validation Errors --}}
             @if($errors->any())
 
-            <div
-                class="alert alert-danger alert-dismissible fade show">
+            <div class="alert alert-danger alert-dismissible fade show">
 
                 <ul class="mb-0">
 
                     @foreach($errors->all() as $error)
 
-                    <li>
-                        {{ $error }}
-                    </li>
+                    <li>{{ $error }}</li>
 
                     @endforeach
 
@@ -114,7 +107,7 @@
 
                     <form
                         method="GET"
-                        action="{{ route('admin.religions.index') }}">
+                        action="{{ route('admin.permissions.index') }}">
 
                         <div class="input-group">
 
@@ -122,24 +115,22 @@
                                 type="text"
                                 name="search"
                                 class="form-control"
-                                placeholder="Search religion..."
-                                value="{{ $search ?? '' }}">
+                                placeholder="Search permissions..."
+                                value="{{ $search }}">
 
                             <button
                                 class="btn btn-outline-secondary"
-                                type="submit"
-                                title="Search">
+                                type="submit">
 
                                 <i class="bi bi-search"></i>
 
                             </button>
 
-                            @if(!empty($search))
+                            @if($search)
 
                             <a
-                                href="{{ route('admin.religions.index') }}"
-                                class="btn btn-outline-secondary"
-                                title="Clear Search">
+                                href="{{ route('admin.permissions.index') }}"
+                                class="btn btn-outline-secondary">
 
                                 <i class="bi bi-x-lg"></i>
 
@@ -165,15 +156,23 @@
 
                         <tr>
 
-                            <th style="width:120px;">
+                            <th style="width:80px;">
                                 ID
                             </th>
 
                             <th>
-                                Religion
+                                Permission
                             </th>
 
-                            <th style="width:150px;">
+                            <th>
+                                Slug
+                            </th>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th style="width:160px;">
                                 Action
                             </th>
 
@@ -181,21 +180,48 @@
 
                     </thead>
 
-
                     <tbody>
 
-                        @forelse($religions as $religion)
+                        @forelse($permissions as $permission)
 
                         <tr>
 
                             <td>
-                                {{ $religion->id }}
+                                {{ $permission->id }}
                             </td>
 
                             <td>
+
                                 <span class="fw-medium">
-                                    {{ $religion->religion ?: '-' }}
+                                    {{ $permission->name }}
                                 </span>
+
+                            </td>
+
+                            <td>
+
+                                <code>
+                                    {{ $permission->slug }}
+                                </code>
+
+                            </td>
+
+                            <td>
+
+                                @if($permission->description)
+
+                                <span>
+                                    {{ $permission->description }}
+                                </span>
+
+                                @else
+
+                                <span class="text-muted">
+                                    -
+                                </span>
+
+                                @endif
+
                             </td>
 
                             <td>
@@ -207,7 +233,7 @@
                                         type="button"
                                         class="btn btn-sm btn-outline-primary"
                                         data-bs-toggle="modal"
-                                        data-bs-target="#editReligionModal{{ $religion->id }}"
+                                        data-bs-target="#editPermissionModal{{ $permission->id }}"
                                         title="Edit">
 
                                         <i class="bi bi-pencil-square"></i>
@@ -217,12 +243,12 @@
 
                                     {{-- Delete --}}
                                     <form
-                                        action="{{ route(
-                                            'admin.religions.destroy',
-                                            $religion->id
-                                        ) }}"
                                         method="POST"
-                                        onsubmit="return confirm('Are you sure you want to delete this religion?');">
+                                        action="{{ route(
+                                                'admin.permissions.destroy',
+                                                $permission->id
+                                            ) }}"
+                                        onsubmit="return confirm('Are you sure you want to delete this permission?');">
 
                                         @csrf
                                         @method('DELETE')
@@ -245,10 +271,10 @@
                         </tr>
 
 
-                        {{-- Edit Religion Modal --}}
+                        {{-- Edit Modal --}}
                         <div
                             class="modal fade"
-                            id="editReligionModal{{ $religion->id }}"
+                            id="editPermissionModal{{ $permission->id }}"
                             tabindex="-1"
                             aria-hidden="true">
 
@@ -259,18 +285,17 @@
                                     <form
                                         method="POST"
                                         action="{{ route(
-                                            'admin.religions.update',
-                                            $religion->id
-                                        ) }}">
+                                                'admin.permissions.update',
+                                                $permission->id
+                                            ) }}">
 
                                         @csrf
                                         @method('PUT')
 
-
                                         <div class="modal-header">
 
                                             <h5 class="modal-title">
-                                                Edit Religion
+                                                Edit Permission
                                             </h5>
 
                                             <button
@@ -284,25 +309,56 @@
 
                                         <div class="modal-body">
 
-                                            {{-- Religion --}}
+                                            {{-- Name --}}
                                             <div class="mb-3">
 
-                                                <label
-                                                    for="religion_{{ $religion->id }}"
-                                                    class="form-label">
-
-                                                    Religion
-
+                                                <label class="form-label">
+                                                    Permission Name
                                                 </label>
 
                                                 <input
                                                     type="text"
-                                                    name="religion"
-                                                    id="religion_{{ $religion->id }}"
+                                                    name="name"
                                                     class="form-control"
-                                                    value="{{ $religion->religion }}"
-                                                    required
+                                                    value="{{ $permission->name }}"
+                                                    maxlength="255"
+                                                    required>
+
+                                            </div>
+
+
+                                            {{-- Slug --}}
+                                            <div class="mb-3">
+
+                                                <label class="form-label">
+                                                    Slug
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    name="slug"
+                                                    class="form-control"
+                                                    value="{{ $permission->slug }}"
                                                     maxlength="255">
+
+                                                <div class="form-text">
+                                                    Example: members.view
+                                                </div>
+
+                                            </div>
+
+
+                                            {{-- Description --}}
+                                            <div class="mb-3">
+
+                                                <label class="form-label">
+                                                    Description
+                                                </label>
+
+                                                <textarea
+                                                    name="description"
+                                                    class="form-control"
+                                                    rows="3">{{ $permission->description }}</textarea>
 
                                             </div>
 
@@ -344,15 +400,13 @@
                         <tr>
 
                             <td
-                                colspan="3"
+                                colspan="5"
                                 class="text-center py-5">
 
-                                <i
-                                    class="bi bi-bookmark fs-1 text-muted">
-                                </i>
+                                <i class="bi bi-shield-lock fs-1 text-muted"></i>
 
                                 <p class="text-muted mb-0 mt-2">
-                                    No religions found.
+                                    No permissions found.
                                 </p>
 
                             </td>
@@ -374,17 +428,17 @@
                 <div class="text-muted small">
 
                     Showing
-                    {{ $religions->firstItem() ?? 0 }}
+                    {{ $permissions->firstItem() ?? 0 }}
                     to
-                    {{ $religions->lastItem() ?? 0 }}
+                    {{ $permissions->lastItem() ?? 0 }}
                     of
-                    {{ $religions->total() }}
+                    {{ $permissions->total() }}
                     entries
 
                 </div>
 
                 <div>
-                    {{ $religions->links() }}
+                    {{ $permissions->links() }}
                 </div>
 
             </div>
@@ -396,13 +450,10 @@
 </div>
 
 
-{{-- =========================================================
-    ADD RELIGION MODAL
-========================================================= --}}
-
+{{-- ADD PERMISSION MODAL --}}
 <div
     class="modal fade"
-    id="addReligionModal"
+    id="addPermissionModal"
     tabindex="-1"
     aria-hidden="true">
 
@@ -412,15 +463,14 @@
 
             <form
                 method="POST"
-                action="{{ route('admin.religions.store') }}">
+                action="{{ route('admin.permissions.store') }}">
 
                 @csrf
-
 
                 <div class="modal-header">
 
                     <h5 class="modal-title">
-                        Add Religion
+                        Add Permission
                     </h5>
 
                     <button
@@ -434,26 +484,57 @@
 
                 <div class="modal-body">
 
-                    {{-- Religion --}}
+                    {{-- Name --}}
                     <div class="mb-3">
 
-                        <label
-                            for="religion"
-                            class="form-label">
-
-                            Religion
-
+                        <label class="form-label">
+                            Permission Name
                         </label>
 
                         <input
                             type="text"
-                            name="religion"
-                            id="religion"
+                            name="name"
                             class="form-control"
-                            placeholder="Enter religion"
-                            value="{{ old('religion') }}"
-                            required
+                            placeholder="e.g. View Members"
+                            maxlength="255"
+                            required>
+
+                    </div>
+
+
+                    {{-- Slug --}}
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Slug
+                        </label>
+
+                        <input
+                            type="text"
+                            name="slug"
+                            class="form-control"
+                            placeholder="e.g. members.view"
                             maxlength="255">
+
+                        <div class="form-text">
+                            Leave blank to generate automatically.
+                        </div>
+
+                    </div>
+
+
+                    {{-- Description --}}
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Describe what this permission allows..."></textarea>
 
                     </div>
 
@@ -471,13 +552,12 @@
 
                     </button>
 
-
                     <button
                         type="submit"
                         class="btn btn-primary">
 
                         <i class="bi bi-plus-circle me-1"></i>
-                        Add Religion
+                        Add Permission
 
                     </button>
 

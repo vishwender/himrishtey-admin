@@ -26,6 +26,11 @@ use App\Http\Controllers\Admin\MembershipPlanController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\UserRatingController;
 use App\Http\Controllers\Admin\SuccessStoryController;
+use App\Http\Controllers\Admin\StaffUserController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\BlogPostController;
+
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
@@ -222,10 +227,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ])->name('members.update');
 
             /*
-    |--------------------------------------------------------------------------
-    | Member Photo Management
-    |--------------------------------------------------------------------------
-    */
+            |--------------------------------------------------------------------------
+            | Member Photo Management
+            |--------------------------------------------------------------------------
+            */
 
             Route::post(
                 '/members/{memberId}/photos',
@@ -353,6 +358,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 '/occupations/{id}/toggle-status',
                 [OccupationController::class, 'toggleStatus']
             )->name('occupations.toggle-status');
+
+            Route::delete('/occupations/{id}', [
+                OccupationController::class,
+                'destroy'
+            ])->name('occupations.destroy');
 
             Route::get(
                 '/employers',
@@ -629,7 +639,120 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     SuccessStoryController::class,
                     'status'
                 ])->name('status');
-            });
+            }); // success stories end here
+
+            Route::prefix('blog-posts')
+                ->name('blog-posts.')
+                ->group(function () {
+
+                    // Blog post listing
+                    Route::get('/', [
+                        BlogPostController::class,
+                        'index'
+                    ])->name('index');
+
+                    // Create form
+                    Route::get('/create', [
+                        BlogPostController::class,
+                        'create'
+                    ])->name('create');
+
+                    // Store new blog post
+                    Route::post('/', [
+                        BlogPostController::class,
+                        'store'
+                    ])->name('store');
+
+                    // Edit form
+                    Route::get('/{post}/edit', [
+                        BlogPostController::class,
+                        'edit'
+                    ])->name('edit');
+
+                    // Update blog post
+                    Route::put('/{post}', [
+                        BlogPostController::class,
+                        'update'
+                    ])->name('update');
+
+                    // Publish / Unpublish
+                    Route::patch('/{post}/toggle-publish', [
+                        BlogPostController::class,
+                        'togglePublish'
+                    ])->name('toggle-publish');
+
+                    // Delete
+                    Route::delete('/{post}', [
+                        BlogPostController::class,
+                        'destroy'
+                    ])->name('destroy');
+                });
+
+            Route::prefix('staff-users')
+                ->name('staff-users.')
+                ->group(function () {
+
+                    Route::get('/', [StaffUserController::class, 'index'])
+                        ->name('index');
+
+                    Route::get('/create', [StaffUserController::class, 'create'])
+                        ->name('create');
+
+                    Route::post('/', [StaffUserController::class, 'store'])
+                        ->name('store');
+
+                    Route::get('/{admin}/edit', [StaffUserController::class, 'edit'])
+                        ->name('edit');
+
+                    Route::put('/{admin}', [StaffUserController::class, 'update'])
+                        ->name('update');
+
+                    Route::patch('/{admin}/toggle-status', [StaffUserController::class, 'toggleStatus'])
+                        ->name('toggle-status');
+
+                    Route::delete('/{admin}', [StaffUserController::class, 'destroy'])
+                        ->name('destroy');
+                }); // staff users ends here
+
+            Route::prefix('roles')
+                ->name('roles.')
+                ->group(function () {
+
+                    Route::get('/', [RoleController::class, 'index'])
+                        ->name('index');
+
+                    Route::get('/create', [RoleController::class, 'create'])
+                        ->name('create');
+
+                    Route::post('/', [RoleController::class, 'store'])
+                        ->name('store');
+
+                    Route::get('/{role}/edit', [RoleController::class, 'edit'])
+                        ->name('edit');
+
+                    Route::put('/{role}', [RoleController::class, 'update'])
+                        ->name('update');
+
+                    Route::delete('/{role}', [RoleController::class, 'destroy'])
+                        ->name('destroy');
+                }); // roles end here
+
+            Route::prefix('permissions')
+                ->name('permissions.')
+                ->group(function () {
+
+                    Route::get('/', [PermissionController::class, 'index'])
+                        ->name('index');
+
+                    Route::post('/', [PermissionController::class, 'store'])
+                        ->name('store');
+
+                    Route::put('/{permission}', [PermissionController::class, 'update'])
+                        ->name('update');
+
+                    Route::delete('/{permission}', [PermissionController::class, 'destroy'])
+                        ->name('destroy');
+                }); //permissions end here
         });
     });
 });
