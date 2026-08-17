@@ -137,6 +137,46 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 'index',
             ])->name('members.index');
 
+            /*
+            |--------------------------------------------------------------------------
+            | Members Advanced search
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get('/members/advanced-search', [
+                MemberController::class,
+                'advancedSearch',
+            ])->name('members.advanced-search');
+
+
+            Route::get('/members/advanced-search/results', [
+                MemberController::class,
+                'advancedSearchResults',
+            ])->name('members.advanced-search.results');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Member
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get('/members/create', [
+                MemberController::class,
+                'create',
+            ])->name('members.create');
+
+            Route::post('/members', [
+                MemberController::class,
+                'store',
+            ])->name('members.store');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Show Member
+            |--------------------------------------------------------------------------
+            */
 
             Route::get('/members/{id}', [
                 MemberController::class,
@@ -172,6 +212,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 MemberController::class,
                 'togglePromoted',
             ])->name('members.toggle-promoted');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Member Location AJAX
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get('/members/location/states/{countryId}', [
+                MemberController::class,
+                'getStates',
+            ])->name('members.location.states');
+
+
+            Route::get('/members/location/cities/{stateId}', [
+                MemberController::class,
+                'getCities',
+            ])->name('members.location.cities');
 
             /*
             |--------------------------------------------------------------------------

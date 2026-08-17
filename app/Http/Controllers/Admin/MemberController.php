@@ -4,9 +4,29 @@ namespace App\Http\Controllers\Admin;
 
 use App\Services\MemberPhotoService;
 use App\Http\Controllers\Controller;
+use App\Models\Occupation;
+use App\Models\Religion;
+use App\Models\Cast;
+use App\Models\Education;
+use App\Models\MotherTongue;
+use App\Models\Height;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
+use App\Models\MaritalStatus;
+use App\Models\FamilyStatus;
+use App\Models\AnnualIncome;
 use App\Models\SiteMember;
+use App\Models\MembershipType;
+use App\Models\MembershipPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use App\Models\Member;
+use Illuminate\Support\Facades\Storage;
+
 
 class MemberController extends Controller
 {
@@ -746,6 +766,919 @@ class MemberController extends Controller
             'relationshipManagers' => $relationshipManagers,
             'returnUrl' => $returnUrl,
         ]);
+    }
+
+    public function create()
+    {
+        /*
+    |--------------------------------------------------------------------------
+    | Load Master Data
+    |--------------------------------------------------------------------------
+    | All these models use the dynamic "site" connection.
+    | SetAdminSiteConnection middleware has already selected
+    | the database for the current site.
+    |--------------------------------------------------------------------------
+    */
+
+        $occupations = Occupation::query()
+            ->where('status', 1)
+            ->orderBy('occupation')
+            ->get();
+
+        $religions = Religion::query()
+            ->orderBy('religion')
+            ->get();
+
+        $casts = Cast::query()
+            ->orderBy('cast')
+            ->get();
+
+        $educations = Education::query()
+            ->orderBy('education')
+            ->get();
+
+        $motherTongues = MotherTongue::query()
+            ->orderBy('mother_tongue')
+            ->get();
+
+        $heights = Height::query()
+            ->orderBy('height_value')
+            ->get();
+
+        $countries = Country::query()
+            ->orderBy('name')
+            ->get();
+        $maritalStatuses = MaritalStatus::query()
+            ->orderBy('marital_status')
+            ->get();
+
+        $familyStatuses = FamilyStatus::query()
+            ->orderBy('value')
+            ->get();
+
+        $annualIncomes = AnnualIncome::query()
+            ->orderBy('annual_income')
+            ->get();
+
+        return view('admin.members.create', compact(
+            'occupations',
+            'religions',
+            'casts',
+            'educations',
+            'motherTongues',
+            'heights',
+            'countries',
+            'maritalStatuses',
+            'familyStatuses',
+            'annualIncomes'
+        ));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+
+            'profile_created_for' => [
+                'required',
+                'string',
+                'max:123',
+            ],
+
+            'full_name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+            ],
+
+            'mobile_number' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'alternate_number' => [
+                'nullable',
+                'string',
+                'max:233',
+            ],
+
+            'whatsapp_number' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'birth_date_time' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'gender' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'height' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'religion' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'mother_tongue' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'cast' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'marital_status' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'education' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'occupation' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'country_living_in' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'state_living_in' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'city_living_in' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+            ],
+
+            'photo' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
+
+            'id_proof' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
+        ]);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Create Member
+    |--------------------------------------------------------------------------
+    */
+
+        DB::connection('site')->transaction(function () use (
+            $request,
+            $validated,
+            &$member
+        ) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | Registration Date
+        |--------------------------------------------------------------------------
+        */
+
+            $registrationDate = now()->format('Y-m-d H:i:s');
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Create Member
+        |--------------------------------------------------------------------------
+        |
+        | profile_id cannot be generated yet because the database
+        | has not generated the member ID.
+        |
+        */
+
+            $member = Member::create([
+
+                'registration_date' => $registrationDate,
+
+                // Temporary value
+                'profile_id' => '0',
+
+                'profile_created_for' =>
+                trim($validated['profile_created_for']),
+
+                'full_name' =>
+                trim($validated['full_name']),
+
+                'email' =>
+                trim($validated['email']),
+
+                'mobile_number' =>
+                trim($validated['mobile_number']),
+
+                'alternate_number' =>
+                $validated['alternate_number'] ?? '',
+
+                'whatsapp_number' =>
+                $validated['whatsapp_number'] ?? '',
+
+                'birth_date_time' =>
+                $validated['birth_date_time'],
+
+                'password' =>
+                Hash::make($validated['password']),
+
+                'height' =>
+                $validated['height'] ?? '',
+
+                'gender' =>
+                $validated['gender'],
+
+                'blood_group' => '',
+
+                'health_info' => '',
+
+                'birth_place' => '',
+
+                'religion' =>
+                $validated['religion'] ?? '',
+
+                'mother_tongue' =>
+                $validated['mother_tongue'] ?? '',
+
+                'cast' =>
+                $validated['cast'] ?? '',
+
+                'sub_cast' => '',
+
+                'gotra' => '',
+
+                'manglik' => '',
+
+                'marital_status' =>
+                $validated['marital_status'] ?? '',
+
+                'no_of_child' => '0',
+
+                'about_my_education' => '',
+
+                'education' =>
+                $validated['education'] ?? '',
+
+                'any_other_qualifications' => '',
+
+                'about_my_career' => '',
+
+                'employed_in' => '',
+
+                'occupation' =>
+                $validated['occupation'] ?? '',
+
+                'designation' => '',
+
+                'organization_name' => '',
+
+                'job_location' => '',
+
+                'annual_income' => '',
+
+                'country_living_in' =>
+                $validated['country_living_in'] ?? '',
+
+                'state_living_in' =>
+                $validated['state_living_in'] ?? '',
+
+                'city_living_in' =>
+                $validated['city_living_in'] ?? '',
+
+                'address_living_in' => '',
+
+                'native_place' => '',
+
+                'family_type' => '',
+
+                'family_status' => '',
+
+                'father_name' => '',
+
+                'father_occupation' => '',
+
+                'mother_name' => '',
+
+                'mother_occupation' => '',
+
+                'no_of_brothers' => '',
+
+                'no_of_sisters' => '',
+
+                'married_brothers' => '',
+
+                'married_sisters' => '',
+
+                'family_income' => '',
+
+                'about_family' => '',
+
+                'diet' => '',
+
+                'is_drinking' => '',
+
+                'is_smoking' => '',
+
+                'about_me' => '',
+
+                'any_disability' => '',
+
+                'looking_for' => '',
+
+                'partner_age_from' => '',
+
+                'partner_age_to' => '',
+
+                'partner_country' => '',
+
+                'partner_religion' => '',
+
+                'partner_cast' => '',
+
+                'partner_height_from' => 0,
+
+                'partner_height_to' => 0,
+
+                'partner_education' => '',
+
+                'partner_mothertongue' => '',
+
+                'partner_annual_income_from' => '',
+
+                'partner_annual_income_to' => '',
+
+                'is_partner_manglik' => '',
+
+                'partner_occupation' => '',
+
+                'partner_state' => '',
+
+                'partner_city' => '',
+
+                'partner_diet' => '',
+
+                'is_partner_smoking' => '',
+
+                'is_partner_drinking' => '',
+
+                'about_my_partner' => '',
+
+                'horoscope_needed' => '0',
+
+                'google_token' => '',
+
+                'referral_code' => '',
+
+                'id_proof' => '',
+
+                'photo' => '',
+
+                'photo_password' => '',
+
+                'photo_approved' => '',
+
+                'active' => 'No',
+
+                'member_type' => 'free',
+
+                'is_trusted' => 'No',
+
+                'plan_id' => '0',
+
+                'plan_activation_date' =>
+                now()->format('Y-m-d'),
+
+                'profile_completed' => '0',
+
+                'promoted' => '0',
+
+                'remarks' => '',
+
+                'relationship_manager' => '',
+
+                'profile_hide' => 'No',
+
+                'hide_for_days' => '0',
+
+                'hidden_date' => '',
+
+                'profile_view_count' => '0',
+
+                'register_through' => 'admin',
+
+                'weight' => '0',
+
+                'assigned_to' => '',
+
+                'activation_number' => 0,
+
+                'pre_active' => 'No',
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Generate Profile ID
+            |--------------------------------------------------------------------------
+            |
+            | Example:
+            |
+            | Member ID = 27807
+            | Profile ID = HIM27807
+            |
+            */
+
+            $member->profile_id = 'HIM' . $member->id;
+
+            $member->save();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Profile Photo
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('photo')) {
+
+            $file = $request->file('photo');
+
+            $filename =
+                'member-photo-' .
+                $member->id .
+                '.' .
+                $file->getClientOriginalExtension();
+
+            $file->storeAs(
+                'profile_photos',
+                $filename,
+                'public'
+            );
+
+            $member->update([
+                'photo' => $filename,
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ID Proof
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('id_proof')) {
+
+            $file = $request->file('id_proof');
+
+            $filename =
+                'idproof-' .
+                $member->id .
+                '.' .
+                $file->getClientOriginalExtension();
+
+            $file->storeAs(
+                'id_proofs',
+                $filename,
+                'public'
+            );
+
+            $member->update([
+                'id_proof' => $filename,
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ID Proof / Document
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('id_proof')) {
+
+            $file = $request->file('id_proof');
+
+            $filename =
+                'id-proof-' .
+                $member->id .
+                '-' .
+                Str::random(10) .
+                '.' .
+                $file->getClientOriginalExtension();
+
+            $file->storeAs(
+                'id_proofs',
+                $filename,
+                'public'
+            );
+
+            $member->update([
+                'id_proof' => $filename,
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route('admin.members.index')
+            ->with(
+                'success',
+                'Member created successfully. Profile ID: ' .
+                    $member->profile_id
+            );
+    }
+
+    public function getStates($countryId)
+    {
+        $states = State::where('country_id', $countryId)
+            ->orderBy('name')
+            ->get([
+                'id',
+                'name',
+            ]);
+
+        return response()->json($states);
+    }
+
+    public function getCities($stateId)
+    {
+        $cities = City::where('state_id', $stateId)
+            ->orderBy('name')
+            ->get([
+                'id',
+                'name',
+            ]);
+
+        return response()->json($cities);
+    }
+
+    public function advancedSearch()
+    {
+        $countries = Country::on('site')
+            ->orderBy('name')
+            ->get();
+
+        $religions = Religion::on('site')
+            ->orderBy('religion')
+            ->get();
+
+        $casts = Cast::on('site')
+            ->orderBy('cast')
+            ->get();
+
+        $educations = Education::on('site')
+            ->orderBy('education')
+            ->get();
+
+        $occupations = Occupation::on('site')
+            ->orderBy('occupation')
+            ->get();
+
+        $motherTongues = MotherTongue::on('site')
+            ->orderBy('mother_tongue')
+            ->get();
+
+        $maritalStatuses = MaritalStatus::on('site')
+            ->orderBy('marital_status')
+            ->get();
+
+        $membershipTypes = MembershipType::on('site')
+            ->orderBy('plan_name')
+            ->get();
+
+        $membershipPlans = MembershipPlan::on('site')
+            ->orderBy('plan_name')
+            ->get();
+
+        return view('admin.members.advanced-search', compact(
+            'countries',
+            'religions',
+            'casts',
+            'educations',
+            'occupations',
+            'motherTongues',
+            'maritalStatuses',
+            'membershipTypes',
+            'membershipPlans'
+        ));
+    }
+
+    public function advancedSearchResults(Request $request)
+    {
+        $query = Member::query();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Basic Search
+    |--------------------------------------------------------------------------
+    */
+
+        if ($request->filled('profile_id')) {
+            $query->where(
+                'profile_id',
+                'like',
+                '%' . trim($request->profile_id) . '%'
+            );
+        }
+
+        if ($request->filled('full_name')) {
+            $query->where(
+                'full_name',
+                'like',
+                '%' . trim($request->full_name) . '%'
+            );
+        }
+
+        if ($request->filled('email')) {
+            $query->where(
+                'email',
+                'like',
+                '%' . trim($request->email) . '%'
+            );
+        }
+
+        if ($request->filled('mobile_number')) {
+            $query->where(
+                'mobile_number',
+                'like',
+                '%' . trim($request->mobile_number) . '%'
+            );
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Personal
+    |--------------------------------------------------------------------------
+    */
+
+        foreach (
+            [
+                'profile_created_for',
+                'gender',
+                'religion',
+                'mother_tongue',
+                'cast',
+                'marital_status',
+                'manglik',
+                'education',
+                'occupation',
+                'employed_in',
+                'country_living_in',
+                'state_living_in',
+                'city_living_in',
+                'family_type',
+                'family_status',
+                'diet',
+                'is_drinking',
+                'is_smoking',
+                'any_disability',
+            ] as $field
+        ) {
+
+            if ($request->filled($field)) {
+                $query->where($field, $request->input($field));
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Account
+    |--------------------------------------------------------------------------
+    */
+
+        foreach (
+            [
+                'active',
+                'member_type',
+                'is_trusted',
+                'promoted',
+                'profile_hide',
+                'register_through',
+                'relationship_manager',
+            ] as $field
+        ) {
+
+            if ($request->filled($field)) {
+                $query->where($field, $request->input($field));
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Partner Preferences
+    |--------------------------------------------------------------------------
+    */
+
+        foreach (
+            [
+                'partner_country',
+                'partner_religion',
+                'partner_cast',
+                'partner_education',
+                'partner_mothertongue',
+                'partner_occupation',
+                'partner_state',
+                'partner_city',
+                'partner_diet',
+                'is_partner_smoking',
+                'is_partner_drinking',
+                'is_partner_manglik',
+            ] as $field
+        ) {
+
+            if ($request->filled($field)) {
+                $query->where($field, $request->input($field));
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Age
+    |--------------------------------------------------------------------------
+    */
+
+        if ($request->filled('age_from')) {
+
+            $date = now()
+                ->subYears((int) $request->age_from)
+                ->endOfDay();
+
+            $query->where(
+                'birth_date_time',
+                '<=',
+                $date
+            );
+        }
+
+
+        if ($request->filled('age_to')) {
+
+            $date = now()
+                ->subYears((int) $request->age_to + 1)
+                ->addDay()
+                ->startOfDay();
+
+            $query->where(
+                'birth_date_time',
+                '>=',
+                $date
+            );
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Partner Age
+    |--------------------------------------------------------------------------
+    */
+
+        if ($request->filled('partner_age_from')) {
+
+            $query->where(
+                'partner_age_from',
+                '<=',
+                $request->partner_age_from
+            );
+        }
+
+        if ($request->filled('partner_age_to')) {
+
+            $query->where(
+                'partner_age_to',
+                '>=',
+                $request->partner_age_to
+            );
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Results
+    |--------------------------------------------------------------------------
+    */
+
+        $members = $query
+            ->latest('id')
+            ->paginate(25)
+            ->withQueryString();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Master Data
+    |--------------------------------------------------------------------------
+    */
+
+        $countries = Country::on('site')
+            ->orderBy('name')
+            ->get();
+
+        $religions = Religion::on('site')
+            ->orderBy('religion')
+            ->get();
+
+        $casts = Cast::on('site')
+            ->orderBy('cast')
+            ->get();
+
+        $educations = Education::on('site')
+            ->orderBy('education')
+            ->get();
+
+        $occupations = Occupation::on('site')
+            ->orderBy('occupation')
+            ->get();
+
+        $motherTongues = MotherTongue::on('site')
+            ->orderBy('mother_tongue')
+            ->get();
+
+        $maritalStatuses = MaritalStatus::on('site')
+            ->orderBy('marital_status')
+            ->get();
+
+        $membershipTypes = MembershipType::on('site')
+            ->orderBy('plan_name')
+            ->get();
+
+        $membershipPlans = MembershipPlan::on('site')
+            ->orderBy('plan_name')
+            ->get();
+
+
+        return view(
+            'admin.members.advanced-search',
+            compact(
+                'members',
+                'countries',
+                'religions',
+                'casts',
+                'educations',
+                'occupations',
+                'motherTongues',
+                'maritalStatuses',
+                'membershipTypes',
+                'membershipPlans'
+            )
+        );
     }
 
     /**

@@ -16,7 +16,15 @@
                 Manage members of the selected site.
             </p>
         </div>
+        <a
+            href="{{ route('admin.members.create') }}"
+            class="btn btn-primary">
 
+            <i class="bi bi-plus-lg me-1"></i>
+
+            Add Member
+
+        </a>
     </div>
 
 

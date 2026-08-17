@@ -2231,49 +2231,6 @@
 
                 <div class="row g-3">
 
-
-                    {{-- Partner Country --}}
-
-                    <div class="col-md-4">
-
-                        <label
-                            for="partner_country"
-                            class="form-label">
-
-                            Partner Country
-
-                        </label>
-
-
-                        <select
-                            name="partner_country"
-                            id="partner_country"
-                            class="form-select">
-
-                            <option value="">
-                                Select Country
-                            </option>
-
-                            @foreach($countries as $country)
-
-                            <option
-                                value="{{ $country->name }}"
-                                data-id="{{ $country->id }}"
-                                @selected(
-                                old('partner_country')==$country->name
-                                )>
-
-                                {{ $country->name }}
-
-                            </option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
-
-
                     {{-- Partner Religion --}}
 
                     <div class="col-md-4">
@@ -2735,7 +2692,46 @@
 
                 <div class="row g-3">
 
+                    {{-- Partner Country --}}
 
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_country"
+                            class="form-label">
+
+                            Partner Country
+
+                        </label>
+
+
+                        <select
+                            name="partner_country"
+                            id="partner_country"
+                            class="form-select">
+
+                            <option value="">
+                                Select Country
+                            </option>
+
+                            @foreach($countries as $country)
+
+                            <option
+                                value="{{ $country->name }}"
+                                data-id="{{ $country->id }}"
+                                @selected(
+                                old('partner_country')==$country->name
+                                )>
+
+                                {{ $country->name }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
                     {{-- Partner State --}}
 
                     <div class="col-md-6">

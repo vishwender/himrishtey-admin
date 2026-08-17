@@ -23,9 +23,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{asset('admin/css/admin.css') }}">
-    <script src="{{asset('admin/js/admin.js')}}"></script>
-
+    <!-- <link rel="stylesheet" href="{{asset('admin/css/admin.css') }}"> -->
+    <!-- <script src="{{asset('admin/js/admin.js')}}"></script> -->
+    @vite('resources/css/admin/admin.css')
+    @vite('resources/css/admin/dashboard/dashboard.css')
     @stack('styles')
 
 </head>
@@ -260,32 +261,6 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                 </div>
 
-                <a
-                    href="{{ route('admin.pages.index') }}"
-                    class="{{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
-
-                    <i class="bi bi-file-earmark-text"></i>
-
-                    Pages
-
-                </a>
-
-                <a href="{{ route('admin.user-ratings.index') }}"
-                    class="{{ request()->routeIs('admin.user-ratings.*') ? 'active' : '' }}">
-
-                    <i class="bi bi-star"></i>
-
-                    <span>User Ratings</span>
-
-                </a>
-
-                {{-- Success Stories --}}
-                <a href="{{ route('admin.success-stories.index') }}"
-                    class="{{ request()->routeIs('admin.success-stories.*') ? 'active' : '' }}">
-                    <i class="bi bi-heart-fill"></i>
-                    <span>Success Stories</span>
-                </a>
-
                 {{-- Staff Management --}}
                 <div class="nav-group {{ request()->routeIs('admin.staff-users.*', 'admin.roles.*', 'admin.permissions.*') ? 'is-open' : '' }}">
 
@@ -393,11 +368,35 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                             </span>
 
                         </a>
+                        {{-- Success Stories --}}
+                        <a href="{{ route('admin.success-stories.index') }}"
+                            class="{{ request()->routeIs('admin.success-stories.*') ? 'active' : '' }}">
+                            <i class="bi bi-heart-fill"></i>
+                            <span>Success Stories</span>
+                        </a>
+                        {{-- Pages --}}
+                        <a
+                            href="{{ route('admin.pages.index') }}"
+                            class="{{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+
+                            <i class="bi bi-file-earmark-text"></i>
+
+                            Pages
+
+                        </a>
 
                     </div>
 
                 </div>
 
+                <a href="{{ route('admin.user-ratings.index') }}"
+                    class="{{ request()->routeIs('admin.user-ratings.*') ? 'active' : '' }}">
+
+                    <i class="bi bi-star"></i>
+
+                    <span>User Ratings</span>
+
+                </a>
 
                 <a href="#">
                     <i class="bi bi-gear me-2"></i>
