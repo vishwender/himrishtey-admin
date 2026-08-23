@@ -217,12 +217,60 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                 </div>
 
-                <a
-                    href="{{ route('admin.members.index') }}"
-                    class="{{ request()->routeIs('admin.members.*') ? 'active' : '' }}">
-                    <i class="bi bi-people me-2"></i>
-                    Members
-                </a>
+                <div class="nav-dropdown {{ request()->routeIs('admin.members.*') ? 'is-open' : '' }}">
+
+                    <button
+                        type="button"
+                        class="nav-dropdown-toggle"
+                        aria-expanded="{{ request()->routeIs('admin.members.*') ? 'true' : 'false' }}">
+
+                        <i class="bi bi-people me-2"></i>
+
+                        Manage Members
+
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </button>
+
+
+                    <div class="nav-dropdown-menu">
+
+                        {{-- Members --}}
+                        <a
+                            href="{{ route('admin.members.index') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.members.index') ? 'active' : '' }}">
+
+                            <i class="bi bi-people me-2"></i>
+
+                            Members
+
+                        </a>
+
+                        {{-- Add Member --}}
+                        <a
+                            href="{{ route('admin.members.create') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.members.create') ? 'active' : '' }}">
+
+                            <i class="bi bi-person-plus me-2"></i>
+
+                            Add Member
+
+                        </a>
+
+
+                        {{-- Advanced Search --}}
+                        <a
+                            href="{{ route('admin.members.advanced-search') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.members.advanced-search') ? 'active' : '' }}">
+
+                            <i class="bi bi-search me-2"></i>
+
+                            Advanced Search
+
+                        </a>
+
+                    </div>
+
+                </div>
 
 
                 <div class="nav-dropdown {{ request()->routeIs('admin.membership-types.*') || request()->routeIs('admin.membership-plans.*') ? 'is-open' : '' }}">
@@ -499,8 +547,7 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
     </div>
 
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.querySelectorAll('.nav-group-toggle, .nav-dropdown-toggle')

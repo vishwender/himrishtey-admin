@@ -15,113 +15,7 @@ class AdminRbacSeeder extends Seeder
     {
         /*
         |--------------------------------------------------------------------------
-        | Permissions
-        |--------------------------------------------------------------------------
-        */
-
-        $permissions = [
-            [
-                'name' => 'View Members',
-                'slug' => 'view-members',
-                'description' => 'View matrimonial members',
-            ],
-            [
-                'name' => 'Create Members',
-                'slug' => 'create-members',
-                'description' => 'Create new members',
-            ],
-            [
-                'name' => 'Edit Members',
-                'slug' => 'edit-members',
-                'description' => 'Edit member information',
-            ],
-            [
-                'name' => 'Delete Members',
-                'slug' => 'delete-members',
-                'description' => 'Delete members',
-            ],
-
-            [
-                'name' => 'View Photos',
-                'slug' => 'view-photos',
-                'description' => 'View member photos',
-            ],
-            [
-                'name' => 'Approve Photos',
-                'slug' => 'approve-photos',
-                'description' => 'Approve member photos',
-            ],
-            [
-                'name' => 'Reject Photos',
-                'slug' => 'reject-photos',
-                'description' => 'Reject member photos',
-            ],
-
-            [
-                'name' => 'View Memberships',
-                'slug' => 'view-memberships',
-                'description' => 'View memberships',
-            ],
-            [
-                'name' => 'Manage Memberships',
-                'slug' => 'manage-memberships',
-                'description' => 'Manage membership plans and subscriptions',
-            ],
-
-            [
-                'name' => 'View Payments',
-                'slug' => 'view-payments',
-                'description' => 'View payment transactions',
-            ],
-            [
-                'name' => 'Manage Payments',
-                'slug' => 'manage-payments',
-                'description' => 'Manage payments',
-            ],
-
-            [
-                'name' => 'View Wallet',
-                'slug' => 'view-wallet',
-                'description' => 'View member wallet information',
-            ],
-            [
-                'name' => 'Manage Wallet',
-                'slug' => 'manage-wallet',
-                'description' => 'Manage member wallet',
-            ],
-
-            [
-                'name' => 'Manage Admins',
-                'slug' => 'manage-admins',
-                'description' => 'Create and manage administrators',
-            ],
-            [
-                'name' => 'Manage Roles',
-                'slug' => 'manage-roles',
-                'description' => 'Create and manage roles',
-            ],
-            [
-                'name' => 'Manage Sites',
-                'slug' => 'manage-sites',
-                'description' => 'Create and manage matrimonial sites',
-            ],
-            [
-                'name' => 'Manage Settings',
-                'slug' => 'manage-settings',
-                'description' => 'Manage admin settings',
-            ],
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::updateOrCreate(
-                ['slug' => $permission['slug']],
-                $permission
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Super Admin Role
+        | Super Admin
         |--------------------------------------------------------------------------
         */
 
@@ -135,13 +29,120 @@ class AdminRbacSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | Give Super Admin all permissions
+        | Super Admin gets ALL permissions
         |--------------------------------------------------------------------------
         */
 
         $superAdminRole->permissions()->sync(
             Permission::pluck('id')->toArray()
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Member Manager
+        |--------------------------------------------------------------------------
+        */
+
+        $memberManagerRole = Role::updateOrCreate(
+            ['slug' => 'member-manager'],
+            [
+                'name' => 'Member Manager',
+                'description' => 'Manage members and member-related functionality',
+            ]
+        );
+
+        $memberManagerPermissions = [
+            'view-members',
+            'create-members',
+            'edit-members',
+
+            'view-photos',
+            'manage-member-photos',
+
+            'manage-member-status',
+            'manage-member-visibility',
+            'manage-member-trusted',
+            'manage-member-promoted',
+
+            'advanced-search-members',
+
+            'view-own-rotations',
+            'create-rotations',
+            'edit-rotations',
+            'complete-rotations',
+            'cancel-rotations',
+        ];
+
+        $memberManagerRole->permissions()->sync(
+            Permission::whereIn(
+                'slug',
+                $memberManagerPermissions
+            )->pluck('id')->toArray()
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Rotation Manager
+        |--------------------------------------------------------------------------
+        */
+
+        $rotationManagerRole = Role::updateOrCreate(
+            ['slug' => 'rotation-manager'],
+            [
+                'name' => 'Rotation Manager',
+                'description' => 'Manage and monitor member rotations',
+            ]
+        );
+
+        $rotationManagerPermissions = [
+            'view-members',
+
+            'view-own-rotations',
+            'view-all-rotations',
+
+            'create-rotations',
+            'edit-rotations',
+            'complete-rotations',
+            'cancel-rotations',
+        ];
+
+        $rotationManagerRole->permissions()->sync(
+            Permission::whereIn(
+                'slug',
+                $rotationManagerPermissions
+            )->pluck('id')->toArray()
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Viewer
+        |--------------------------------------------------------------------------
+        */
+
+        $viewerRole = Role::updateOrCreate(
+            ['slug' => 'viewer'],
+            [
+                'name' => 'Viewer',
+                'description' => 'View-only access to members and rotations',
+            ]
+        );
+
+        $viewerPermissions = [
+            'view-members',
+            'view-photos',
+            'view-own-rotations',
+        ];
+
+        $viewerRole->permissions()->sync(
+            Permission::whereIn(
+                'slug',
+                $viewerPermissions
+            )->pluck('id')->toArray()
+        );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -159,6 +160,7 @@ class AdminRbacSeeder extends Seeder
             ]
         );
 
+
         /*
         |--------------------------------------------------------------------------
         | Assign Super Admin Role
@@ -169,18 +171,40 @@ class AdminRbacSeeder extends Seeder
             $superAdminRole->id,
         ]);
 
+
         /*
         |--------------------------------------------------------------------------
-        | Give Super Admin Access To All Sites
+        | Give Super Admin Access To All Active Sites
         |--------------------------------------------------------------------------
         */
 
         $admin->sites()->sync(
-            Site::where('status', true)->pluck('id')->toArray()
+            Site::where('status', true)
+                ->pluck('id')
+                ->toArray()
         );
 
-        $this->command->info('Admin RBAC seeded successfully.');
-        $this->command->info('Email: admin@example.com');
-        $this->command->info('Password: ChangeMe@123');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Output
+        |--------------------------------------------------------------------------
+        */
+
+        $this->command->info(
+            'Admin RBAC seeded successfully.'
+        );
+
+        $this->command->info(
+            'Roles created: Super Admin, Member Manager, Rotation Manager, Viewer'
+        );
+
+        $this->command->info(
+            'Super Admin: admin@example.com'
+        );
+
+        $this->command->info(
+            'Password: ChangeMe@123'
+        );
     }
 }

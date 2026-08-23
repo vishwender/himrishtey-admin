@@ -19,6 +19,7 @@ use App\Models\AnnualIncome;
 use App\Models\SiteMember;
 use App\Models\MembershipType;
 use App\Models\MembershipPlan;
+use App\Models\MemberRotation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Models\Member;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 
 class MemberController extends Controller
@@ -1236,7 +1238,7 @@ class MemberController extends Controller
             |
             */
 
-            $member->profile_id = 'HIM' . $member->id;
+            $member->profile_id = $this->generateProfileId($member->id);
 
             $member->save();
         });
@@ -2688,5 +2690,150 @@ class MemberController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Member remarks updated successfully.');
+    }
+
+    public function storeRotation(Request $request, $memberId)
+    {
+        $validated = $request->validate([
+            'days' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:365',
+            ],
+
+            'time' => [
+                'required',
+                'date_format:H:i',
+            ],
+        ]);
+
+
+        $member = Member::findOrFail($memberId);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Calculate Next Rotation
+    |--------------------------------------------------------------------------
+    */
+
+        $nextRotationAt = Carbon::today()
+            ->addDays((int) $validated['days'])
+            ->setTimeFromTimeString($validated['time']);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Save Rotation
+        |--------------------------------------------------------------------------
+        */
+
+        MemberRotation::create([
+
+            'member_id' => $member->id,
+
+            'user_id' => auth('admin')->id(),
+
+            'days' => $validated['days'],
+
+            'time' => $validated['time'],
+
+            'next_rotation_at' => $nextRotationAt,
+
+            'status' => 'pending',
+
+        ]);
+
+
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Rotation scheduled for ' .
+                    $nextRotationAt->format('d M Y h:i A')
+            );
+    }
+
+    public function createRotation(Request $request, $memberId)
+    {
+        $validated = $request->validate([
+            'days' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+
+            'time' => [
+                'required',
+                'date_format:H:i',
+            ],
+        ]);
+
+        /*
+    |--------------------------------------------------------------------------
+    | Check Member
+    |--------------------------------------------------------------------------
+    */
+
+        $member = Member::findOrFail($memberId);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Calculate Next Rotation
+    |--------------------------------------------------------------------------
+    |
+    | Example:
+    |
+    | Today = 18 August
+    | Days  = 7
+    | Time  = 10:30
+    |
+    | Next rotation = 25 August 10:30
+    |
+    */
+
+        $nextRotationAt = Carbon::today()
+            ->addDays((int) $validated['days'])
+            ->setTimeFromTimeString($validated['time']);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Create Rotation
+    |--------------------------------------------------------------------------
+    */
+
+        MemberRotation::create([
+            'member_id' => $member->id,
+
+            'user_id' => auth('admin')->id(),
+
+            'days' => $validated['days'],
+
+            'time' => $validated['time'],
+
+            'next_rotation_at' => $nextRotationAt,
+
+            'status' => 'pending',
+
+            'completed_at' => null,
+        ]);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Response
+    |--------------------------------------------------------------------------
+    */
+
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Member rotation scheduled successfully for ' .
+                    $nextRotationAt->format('d M Y h:i A')
+            );
     }
 }

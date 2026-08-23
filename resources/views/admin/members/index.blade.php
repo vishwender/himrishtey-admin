@@ -937,6 +937,21 @@
 
                                         </li>
 
+                                        <li>
+                                            <button
+                                                type="button"
+                                                class="dropdown-item"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#rotationModal"
+                                                data-member-id="{{ $member->id }}"
+                                                data-member-name="{{ $member->full_name }}">
+
+                                                <i class="bi bi-arrow-repeat me-2"></i>
+                                                Add Rotation
+
+                                            </button>
+                                        </li>
+
                                     </ul>
 
                                 </div>
@@ -1093,6 +1108,152 @@
 
 </div>
 
+{{-- =========================================================
+     MEMBER ROTATION MODAL
+========================================================= --}}
+
+<div
+    class="modal fade"
+    id="rotationModal"
+    tabindex="-1"
+    aria-labelledby="rotationModalLabel"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title"
+                    id="rotationModalLabel">
+                    Set Member Rotation
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+            <form
+                method="POST"
+                id="rotationForm">
+
+                @csrf
+
+                <div class="modal-body">
+
+                    {{-- Member --}}
+                    <div class="mb-3">
+
+                        <label
+                            for="rotationMemberName"
+                            class="form-label">
+                            Member
+                        </label>
+
+                        <input
+                            type="text"
+                            id="rotationMemberName"
+                            class="form-control"
+                            readonly>
+
+                    </div>
+
+
+                    {{-- Days --}}
+                    <div class="mb-3">
+
+                        <label
+                            for="rotationDays"
+                            class="form-label">
+                            Rotation Days
+                        </label>
+
+                        <input
+                            type="number"
+                            name="days"
+                            id="rotationDays"
+                            class="form-control"
+                            min="1"
+                            max="365"
+                            value="7"
+                            required>
+
+                        <small class="text-muted">
+                            Number of days until the next rotation.
+                        </small>
+
+                    </div>
+
+
+                    {{-- Time --}}
+                    <div class="mb-3">
+
+                        <label
+                            for="rotationTime"
+                            class="form-label">
+                            Rotation Time
+                        </label>
+
+                        <input
+                            type="time"
+                            name="time"
+                            id="rotationTime"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+
+                    {{-- Preview --}}
+                    <div
+                        class="alert alert-light border"
+                        id="rotationPreview">
+
+                        Next rotation will be calculated after saving.
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        <i class="bi bi-check-circle me-1"></i>
+
+                        Save Rotation
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
 @endsection
 
 @push('scripts')
@@ -1209,5 +1370,303 @@
         });
 
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const rotationModal = document.getElementById('rotationModal');
+
+        const rotationForm = document.getElementById('rotationForm');
+
+        const rotationMemberName =
+            document.getElementById('rotationMemberName');
+
+        const rotationDays =
+            document.getElementById('rotationDays');
+
+        const rotationTime =
+            document.getElementById('rotationTime');
+
+        const rotationPreview =
+            document.getElementById('rotationPreview');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Elements
+        |--------------------------------------------------------------------------
+        */
+
+        if (!rotationModal) {
+            console.error('Rotation modal not found.');
+            return;
+        }
+
+        if (!rotationForm) {
+            console.error('Rotation form not found.');
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Current Time
+        |--------------------------------------------------------------------------
+        */
+
+        function getCurrentTime() {
+
+            const now = new Date();
+
+            const hours =
+                String(now.getHours()).padStart(2, '0');
+
+            const minutes =
+                String(now.getMinutes()).padStart(2, '0');
+
+            return `${hours}:${minutes}`;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Rotation Preview
+        |--------------------------------------------------------------------------
+        */
+
+        function updateRotationPreview() {
+
+            const days =
+                parseInt(rotationDays.value, 10);
+
+            const time =
+                rotationTime.value;
+
+
+            if (!days || days < 1 || !time) {
+
+                rotationPreview.innerHTML =
+                    'Enter rotation days and time.';
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Calculate Next Rotation Date
+            |--------------------------------------------------------------------------
+            */
+
+            const nextDate = new Date();
+
+            nextDate.setHours(0, 0, 0, 0);
+
+            nextDate.setDate(
+                nextDate.getDate() + days
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Format Date
+            |--------------------------------------------------------------------------
+            */
+
+            const dateString =
+                nextDate.toLocaleDateString(
+                    'en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Format Time
+            |--------------------------------------------------------------------------
+            */
+
+            const [hours, minutes] =
+            time.split(':');
+
+
+            const displayTime =
+                new Date();
+
+            displayTime.setHours(
+                parseInt(hours, 10),
+                parseInt(minutes, 10),
+                0,
+                0
+            );
+
+
+            const timeString =
+                displayTime.toLocaleTimeString(
+                    'en-IN', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Show Preview
+            |--------------------------------------------------------------------------
+            */
+
+            rotationPreview.innerHTML = `
+            <strong>Next Rotation:</strong>
+            ${dateString} at ${timeString}
+        `;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bootstrap Modal Open
+        |--------------------------------------------------------------------------
+        */
+
+        rotationModal.addEventListener(
+            'show.bs.modal',
+            function(event) {
+
+                const button =
+                    event.relatedTarget;
+
+
+                if (!button) {
+
+                    console.error(
+                        'Rotation modal opened without a trigger button.'
+                    );
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Get Member Information
+                |--------------------------------------------------------------------------
+                */
+
+                const memberId =
+                    button.getAttribute('data-member-id');
+
+                const memberName =
+                    button.getAttribute('data-member-name');
+
+
+                console.log(
+                    'Opening rotation for member:',
+                    memberId,
+                    memberName
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Member Name
+                |--------------------------------------------------------------------------
+                */
+
+                rotationMemberName.value =
+                    memberName || '';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Form Action
+                |--------------------------------------------------------------------------
+                */
+
+                if (memberId) {
+
+                    rotationForm.action =
+                        `/admin/members/${memberId}/rotation`;
+
+                } else {
+
+                    console.error(
+                        'Member ID missing from rotation button.'
+                    );
+
+                    rotationForm.action = '';
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Default Days
+                |--------------------------------------------------------------------------
+                */
+
+                rotationDays.value = 7;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Default Time
+                |--------------------------------------------------------------------------
+                */
+
+                rotationTime.value =
+                    getCurrentTime();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Preview
+                |--------------------------------------------------------------------------
+                */
+
+                updateRotationPreview();
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Days Changed
+        |--------------------------------------------------------------------------
+        */
+
+        rotationDays.addEventListener(
+            'input',
+            updateRotationPreview
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Time Changed
+        |--------------------------------------------------------------------------
+        */
+
+        rotationTime.addEventListener(
+            'change',
+            updateRotationPreview
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Also Update When User Types Time
+        |--------------------------------------------------------------------------
+        */
+
+        rotationTime.addEventListener(
+            'input',
+            updateRotationPreview
+        );
+
+    });
 </script>
+
 @endpush

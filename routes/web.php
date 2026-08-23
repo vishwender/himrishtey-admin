@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\StaffUserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\BlogPostController;
+use App\Http\Controllers\Admin\MemberRotationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -212,6 +213,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 MemberController::class,
                 'togglePromoted',
             ])->name('members.toggle-promoted');
+
+            Route::post(
+                '/members/{memberId}/rotation',
+                [MemberController::class, 'storeRotation']
+            )->name('members.rotation.store');
+
+            Route::post(
+                '/members/{memberId}/rotation',
+                [MemberController::class, 'createRotation']
+            )->name('members.rotation.create');
+
+            Route::get(
+                '/members/rotations',
+                [MemberRotationController::class, 'index']
+            )->name('admin.members.rotations');
+
+            Route::get(
+                '/rotations',
+                [MemberRotationController::class, 'index']
+            )->name('admin.rotations.index');
 
             /*
             |--------------------------------------------------------------------------

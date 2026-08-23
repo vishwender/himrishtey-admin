@@ -3,7 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 use App\Models\MemberPhoto;
+use App\Models\MemberRotation;
 
 class Member extends Model
 {
@@ -15,15 +19,13 @@ class Member extends Model
 
     protected $guarded = [];
 
-    /**
-     * Format height stored in the database.
-     *
-     * Examples:
-     * 5.7  -> 5ft 7in
-     * 5.10 -> 5ft 10in
-     * 5.11 -> 5ft 11in
-     * 6    -> 6ft 0in
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Format Height
+    |--------------------------------------------------------------------------
+    */
+
     public function formatHeight($height): string
     {
         if ($height === null || $height === '') {
@@ -47,27 +49,35 @@ class Member extends Model
         return "{$feet}ft {$inches}in";
     }
 
-    /**
-     * Get formatted partner height from.
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Partner Height
+    |--------------------------------------------------------------------------
+    */
+
     public function getPartnerHeightFromFormattedAttribute(): string
     {
-        return $this->formatHeight($this->partner_height_from);
+        return $this->formatHeight(
+            $this->partner_height_from
+        );
     }
 
-    /**
-     * Get formatted partner height to.
-     */
+
     public function getPartnerHeightToFormattedAttribute(): string
     {
-        return $this->formatHeight($this->partner_height_to);
+        return $this->formatHeight(
+            $this->partner_height_to
+        );
     }
 
-    /**
-     * Calculate profile completion percentage.
-     *
-     * Counts fields in the members table that contain a value.
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Profile Completion
+    |--------------------------------------------------------------------------
+    */
+
     public function getProfileCompletionAttribute(): int
     {
         $excludedFields = [
@@ -90,7 +100,10 @@ class Member extends Model
 
             $totalFields++;
 
-            if ($value !== null && trim((string) $value) !== '') {
+            if (
+                $value !== null &&
+                trim((string) $value) !== ''
+            ) {
                 $completedFields++;
             }
         }
@@ -104,9 +117,13 @@ class Member extends Model
         );
     }
 
-    /**
-     * Get number of completed profile fields.
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Completed Profile Fields
+    |--------------------------------------------------------------------------
+    */
+
     public function getCompletedFieldsAttribute(): int
     {
         $excludedFields = [
@@ -124,7 +141,10 @@ class Member extends Model
                 continue;
             }
 
-            if ($value !== null && trim((string) $value) !== '') {
+            if (
+                $value !== null &&
+                trim((string) $value) !== ''
+            ) {
                 $completed++;
             }
         }
@@ -132,9 +152,13 @@ class Member extends Model
         return $completed;
     }
 
-    /**
-     * Get total profile fields considered for completion.
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Total Profile Fields
+    |--------------------------------------------------------------------------
+    */
+
     public function getTotalFieldsAttribute(): int
     {
         $excludedFields = [
@@ -152,28 +176,99 @@ class Member extends Model
         );
     }
 
-    /**
-     * Determine whether the member is active.
-     *
-     * Active values are based on "Yes".
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Active Status
+    |--------------------------------------------------------------------------
+    */
+
     public function getIsActiveAttribute(): bool
     {
-        return strtolower(trim((string) $this->active)) === 'yes';
+        return strtolower(
+            trim((string) $this->active)
+        ) === 'yes';
     }
 
-    /**
-     * Determine whether the member is inactive.
-     *
-     * Inactive values are NULL or "No".
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Inactive Status
+    |--------------------------------------------------------------------------
+    */
+
     public function getIsInactiveAttribute(): bool
     {
-        return !$this->active;
+        return !$this->is_active;
     }
 
-    public function photos()
+
+    /*
+    |--------------------------------------------------------------------------
+    | Member Photos
+    |--------------------------------------------------------------------------
+    */
+
+    public function photos(): HasMany
     {
-        return $this->hasMany(MemberPhoto::class, 'member_id', 'id');
+        return $this->hasMany(
+            MemberPhoto::class,
+            'member_id',
+            'id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Member Rotations
+    |--------------------------------------------------------------------------
+    */
+
+    public function rotations(): HasMany
+    {
+        return $this->hasMany(
+            MemberRotation::class,
+            'member_id',
+            'id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Latest Rotation
+    |--------------------------------------------------------------------------
+    */
+
+    public function latestRotation(): HasOne
+    {
+        return $this->hasOne(
+            MemberRotation::class,
+            'member_id',
+            'id'
+        )->latestOfMany();
+    }
+
+    protected function generateProfileId(int $memberId): string
+    {
+        $database = DB::connection('site')
+            ->getDatabaseName();
+
+        $prefixes = [
+            'himrishtey_main'       => 'HIM',
+            'himrishtey_gallpakki'  => 'PB',
+            'himrishtey_dogririshtey' => 'DR',
+        ];
+
+        $prefix = $prefixes[$database] ?? null;
+
+        if (!$prefix) {
+            throw new \RuntimeException(
+                "No profile ID prefix configured for database: {$database}"
+            );
+        }
+
+        return $prefix . $memberId;
     }
 }
