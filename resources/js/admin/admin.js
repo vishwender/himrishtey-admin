@@ -8,9 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const savedTheme = localStorage.getItem('admin-theme');
 
-    if (savedTheme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    }
+    applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
 
     updateThemeIcon();
 
@@ -20,15 +18,26 @@ document.addEventListener('DOMContentLoaded', function () {
             document.documentElement.getAttribute('data-theme');
 
         if (currentTheme === 'dark') {
-            document.documentElement.removeAttribute('data-theme');
+            applyTheme('light');
             localStorage.setItem('admin-theme', 'light');
         } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
+            applyTheme('dark');
             localStorage.setItem('admin-theme', 'dark');
         }
 
         updateThemeIcon();
     });
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            return;
+        }
+
+        document.documentElement.removeAttribute('data-theme');
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+    }
 
     function updateThemeIcon() {
 

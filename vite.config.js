@@ -7,10 +7,10 @@ export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/css/app.css',
-                    'resources/admin/dashboard/dashboard.css', 
-                    'resources/admin/members/create-members.css',
-                    'resources/admin/user-rating/user-rating.css',
-                    'resources/admin/admin.css',
+                    'resources/css/admin/dashboard/dashboard.css',
+                    'resources/css/admin/members/create-member.css',
+                    'resources/css/admin/user-rating/user-rating.css',
+                    'resources/css/admin/admin.css',
                     'resources/js/app.js',
                     'resources/js/admin/admin.js',
                     'resources/js/admin/create-member.js'],

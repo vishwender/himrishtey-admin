@@ -1,21 +1,29 @@
 @extends('admin.layout')
+
 @section('title', 'Staff Users')
 
 @section('content')
 
 <div class="content">
 
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    {{-- ================================================================
+        Header
+    ================================================================= --}}
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 
         <div>
-            <h1 class="mb-1">Staff Users</h1>
+            <h1 class="mb-1">
+                Staff Users
+            </h1>
+
             <p class="text-muted mb-0">
                 Manage HimRishtey staff accounts, roles and site access.
             </p>
         </div>
 
-        <a href="{{ route('admin.staff-users.create') }}"
+        <a
+            href="{{ route('admin.staff-users.create') }}"
             class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i>
             Add Staff User
@@ -24,83 +32,109 @@
     </div>
 
 
-    {{-- Alerts --}}
+    {{-- ================================================================
+        Alerts
+    ================================================================= --}}
+
     @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4"
+
+    <div
+        class="alert alert-success alert-dismissible fade show mb-4"
         role="alert">
 
         <i class="bi bi-check-circle me-2"></i>
 
         {{ session('success') }}
 
-        <button type="button"
+        <button
+            type="button"
             class="btn-close"
-            data-bs-dismiss="alert"></button>
+            data-bs-dismiss="alert"
+            aria-label="Close"></button>
+
     </div>
+
     @endif
 
 
     @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show mb-4"
+
+    <div
+        class="alert alert-danger alert-dismissible fade show mb-4"
         role="alert">
 
         <i class="bi bi-exclamation-circle me-2"></i>
 
         {{ session('error') }}
 
-        <button type="button"
+        <button
+            type="button"
             class="btn-close"
-            data-bs-dismiss="alert"></button>
+            data-bs-dismiss="alert"
+            aria-label="Close"></button>
+
     </div>
+
     @endif
 
 
-    {{-- Staff Users --}}
-    <div class="card">
+    {{-- ================================================================
+        Staff Users
+    ================================================================= --}}
 
-        <div class="card-header bg-transparent">
+    <div class="card border-0 shadow-sm">
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                 <div>
-                    <h5 class="mb-1">All Staff Users</h5>
+
+                    <h5 class="mb-1">
+                        All Staff Users
+                    </h5>
 
                     <div class="text-muted small">
-                        {{ $staffUsers->total() }}
-                        staff user(s)
+
+                        {{ number_format($staffUsers->total()) }}
+
+                        {{ $staffUsers->total() === 1 ? 'staff user' : 'staff users' }}
+
                     </div>
+
                 </div>
 
-                <div>
-                    <form
-                        method="GET"
-                        action="{{ route('admin.staff-users.index') }}"
-                        class="d-flex gap-2">
 
-                        <div class="input-group">
+                {{-- Search --}}
 
-                            <span class="input-group-text bg-white">
-                                <i class="bi bi-search"></i>
-                            </span>
+                <form
+                    method="GET"
+                    action="{{ route('admin.staff-users.index') }}"
+                    class="staff-search-form">
 
-                            <input
-                                type="text"
-                                name="search"
-                                class="form-control"
-                                value="{{ $search }}"
-                                placeholder="Search staff users..."
-                                style="min-width: 260px;">
+                    <div class="input-group">
 
-                            @if($search)
-                            <a
-                                href="{{ route('admin.staff-users.index') }}"
-                                class="btn btn-outline-secondary"
-                                title="Clear search">
-                                <i class="bi bi-x-lg"></i>
-                            </a>
-                            @endif
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search"></i>
+                        </span>
 
-                        </div>
+                        <input
+                            type="text"
+                            name="search"
+                            class="form-control"
+                            value="{{ $search ?? '' }}"
+                            placeholder="Search staff users...">
+
+                        @if(!empty($search))
+
+                        <a
+                            href="{{ route('admin.staff-users.index') }}"
+                            class="btn btn-outline-secondary"
+                            title="Clear search">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+
+                        @endif
 
                         <button
                             type="submit"
@@ -108,8 +142,9 @@
                             Search
                         </button>
 
-                    </form>
-                </div>
+                    </div>
+
+                </form>
 
             </div>
 
@@ -122,9 +157,10 @@
 
             <div class="table-responsive">
 
-                <table class="table align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 staff-table">
 
-                    <thead>
+                    <thead class="table-light">
+
                         <tr>
 
                             <th class="ps-4">
@@ -152,6 +188,7 @@
                             </th>
 
                         </tr>
+
                     </thead>
 
 
@@ -161,14 +198,28 @@
 
                         <tr>
 
-                            {{-- Staff --}}
+                            {{-- ====================================================
+                                        Staff
+                                    ===================================================== --}}
+
                             <td class="ps-4">
 
                                 <div class="d-flex align-items-center">
 
                                     <div class="staff-avatar me-3">
-                                        {{ strtoupper(substr($staff->name, 0, 1)) }}
+
+                                        {{
+                                                    strtoupper(
+                                                        substr(
+                                                            trim($staff->name),
+                                                            0,
+                                                            1
+                                                        )
+                                                    )
+                                                }}
+
                                     </div>
+
 
                                     <div>
 
@@ -187,43 +238,72 @@
                             </td>
 
 
-                            {{-- Profile ID --}}
+                            {{-- ====================================================
+                                        Profile ID
+                                    ===================================================== --}}
+
                             <td>
+
+                                @if(!empty($staff->profile_id))
 
                                 <span class="fw-semibold">
                                     {{ $staff->profile_id }}
                                 </span>
 
-                            </td>
-
-
-                            {{-- Role --}}
-                            <td>
-
-                                @forelse($staff->roles as $role)
-
-                                <span class="badge bg-primary-subtle text-primary">
-                                    {{ $role->name }}
-                                </span>
-
-                                @empty
+                                @else
 
                                 <span class="text-muted">
-                                    No role
+                                    —
                                 </span>
 
-                                @endforelse
+                                @endif
 
                             </td>
 
 
-                            {{-- Sites --}}
+                            {{-- ====================================================
+                                        Role
+                                    ===================================================== --}}
+
+                            <td>
+
+                                <div class="d-flex flex-wrap gap-1">
+
+                                    @forelse($staff->roles as $role)
+
+                                    <span class="badge bg-primary-subtle text-primary">
+
+                                        {{ $role->name }}
+
+                                    </span>
+
+                                    @empty
+
+                                    <span class="text-muted">
+                                        No role
+                                    </span>
+
+                                    @endforelse
+
+                                </div>
+
+                            </td>
+
+
+                            {{-- ====================================================
+                                        Site Access
+                                    ===================================================== --}}
+
                             <td>
 
                                 @if($staff->hasRole('super-admin'))
 
                                 <span class="badge bg-primary-subtle text-primary">
+
+                                    <i class="bi bi-globe2 me-1"></i>
+
                                     All Sites
+
                                 </span>
 
                                 @elseif($staff->sites->count())
@@ -233,7 +313,9 @@
                                     @foreach($staff->sites as $site)
 
                                     <span class="badge bg-light text-dark border">
+
                                         {{ $site->name }}
+
                                     </span>
 
                                     @endforeach
@@ -251,21 +333,30 @@
                             </td>
 
 
-                            {{-- Status --}}
+                            {{-- ====================================================
+                                        Status
+                                    ===================================================== --}}
+
                             <td>
 
                                 @if($staff->status)
 
                                 <span class="badge bg-success-subtle text-success">
+
                                     <i class="bi bi-check-circle me-1"></i>
+
                                     Active
+
                                 </span>
 
                                 @else
 
                                 <span class="badge bg-danger-subtle text-danger">
+
                                     <i class="bi bi-x-circle me-1"></i>
+
                                     Inactive
+
                                 </span>
 
                                 @endif
@@ -273,30 +364,51 @@
                             </td>
 
 
-                            {{-- Actions --}}
+                            {{-- ====================================================
+                                        Actions
+                                    ===================================================== --}}
+
                             <td class="text-end pe-4">
 
-                                <div class="d-inline-flex gap-1">
+                                <div class="d-inline-flex align-items-center gap-1">
+
+
+                                    {{-- Activity --}}
+
+                                    <a
+                                        href="{{ route('admin.staff.activity', $staff->id) }}"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        title="View Activity">
+
+                                        <i class="bi bi-clock-history"></i>
+
+                                    </a>
+
 
                                     {{-- Edit --}}
-                                    <a href="{{ route('admin.staff-users.edit', $staff) }}"
+
+                                    <a
+                                        href="{{ route('admin.staff-users.edit', $staff) }}"
                                         class="btn btn-sm btn-outline-primary"
-                                        title="Edit">
+                                        title="Edit Staff User">
 
                                         <i class="bi bi-pencil"></i>
 
                                     </a>
 
 
-                                    {{-- Toggle status --}}
-                                    <form action="{{ route('admin.staff-users.toggle-status', $staff) }}"
+                                    {{-- Toggle Status --}}
+
+                                    <form
+                                        action="{{ route('admin.staff-users.toggle-status', $staff) }}"
                                         method="POST"
                                         class="d-inline">
 
                                         @csrf
                                         @method('PATCH')
 
-                                        <button type="submit"
+                                        <button
+                                            type="submit"
                                             class="btn btn-sm btn-outline-warning"
                                             title="{{ $staff->status ? 'Deactivate' : 'Activate' }}"
                                             onclick="return confirm('Are you sure you want to {{ $staff->status ? 'deactivate' : 'activate' }} this staff user?')">
@@ -317,16 +429,19 @@
 
 
                                     {{-- Delete --}}
-                                    <form action="{{ route('admin.staff-users.destroy', $staff) }}"
+
+                                    <form
+                                        action="{{ route('admin.staff-users.destroy', $staff) }}"
                                         method="POST"
                                         class="d-inline">
 
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="submit"
+                                        <button
+                                            type="submit"
                                             class="btn btn-sm btn-outline-danger"
-                                            title="Delete"
+                                            title="Delete Staff User"
                                             onclick="return confirm('Are you sure you want to permanently delete this staff user?')">
 
                                             <i class="bi bi-trash"></i>
@@ -350,36 +465,79 @@
             </div>
 
 
-            {{-- Pagination --}}
+            {{-- ====================================================
+                    Pagination
+                ===================================================== --}}
+
             @if($staffUsers->hasPages())
 
-            <div class="card-footer bg-transparent">
+            <div class="card-footer bg-white">
 
-                {{ $staffUsers->links() }}
+                {{
+                            $staffUsers->links(
+                                'pagination::bootstrap-5'
+                            )
+                        }}
 
             </div>
 
             @endif
 
+
             @else
 
-            {{-- Empty state --}}
+            {{-- ====================================================
+                    Empty State
+                ===================================================== --}}
+
             <div class="text-center py-5">
 
                 <div class="empty-state-icon mb-3">
+
                     <i class="bi bi-people"></i>
+
                 </div>
 
-                <h5>No Staff Users Found</h5>
+                <h5>
+                    No Staff Users Found
+                </h5>
 
                 <p class="text-muted mb-4">
+
+                    @if(!empty($search))
+
+                    No staff users matched your search.
+
+                    @else
+
                     There are currently no staff users in the system.
+
+                    @endif
+
                 </p>
 
-                <a href="{{ route('admin.staff-users.create') }}"
+
+                @if(!empty($search))
+
+                <a
+                    href="{{ route('admin.staff-users.index') }}"
+                    class="btn btn-outline-secondary me-2">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+
+                    Clear Search
+
+                </a>
+
+                @endif
+
+
+                <a
+                    href="{{ route('admin.staff-users.create') }}"
                     class="btn btn-primary">
 
                     <i class="bi bi-plus-lg me-1"></i>
+
                     Add Staff User
 
                 </a>
@@ -396,7 +554,14 @@
 
 
 <style>
+    /*
+    |--------------------------------------------------------------------------
+    | Staff Avatar
+    |--------------------------------------------------------------------------
+    */
+
     .staff-avatar {
+
         width: 42px;
         height: 42px;
 
@@ -408,20 +573,75 @@
 
         border-radius: 12px;
 
-        background: linear-gradient(135deg,
+        background:
+            linear-gradient(135deg,
                 #8063ff,
                 #6040ed);
 
         color: #fff;
 
         font-family: 'Outfit', sans-serif;
+
         font-weight: 700;
 
-        box-shadow: 0 5px 12px rgba(96, 64, 237, .18);
+        box-shadow:
+            0 5px 12px rgba(96, 64, 237, .18);
+
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Search
+    |--------------------------------------------------------------------------
+    */
+
+    .staff-search-form {
+
+        width: 100%;
+        max-width: 430px;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Table
+    |--------------------------------------------------------------------------
+    */
+
+    .staff-table th {
+
+        font-size: .78rem;
+
+        font-weight: 700;
+
+        text-transform: uppercase;
+
+        letter-spacing: .03em;
+
+        color: #6c757d;
+
+        white-space: nowrap;
+
+    }
+
+
+    .staff-table td {
+
+        vertical-align: middle;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Empty State
+    |--------------------------------------------------------------------------
+    */
+
     .empty-state-icon {
+
         width: 64px;
         height: 64px;
 
@@ -435,16 +655,34 @@
         border-radius: 16px;
 
         background: #eeeaff;
+
         color: var(--app-primary);
 
         font-size: 1.5rem;
+
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile
+    |--------------------------------------------------------------------------
+    */
+
     @media (max-width: 767.98px) {
 
-        .table {
-            min-width: 900px;
+        .content h1 {
+            font-size: 1.6rem;
+        }
+
+
+        .staff-search-form {
+            max-width: 100%;
+        }
+
+
+        .staff-table {
+            min-width: 950px;
         }
 
     }

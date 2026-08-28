@@ -135,6 +135,37 @@
 
                     </div>
 
+                    {{-- Banned Status --}}
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Banned
+                        </label>
+
+                        <select
+                            name="banned"
+                            class="form-select">
+
+                            <option value="">
+                                All
+                            </option>
+
+                            <option
+                                value="yes"
+                                {{ request('banned') === 'yes' ? 'selected' : '' }}>
+                                Banned
+                            </option>
+
+                            <option
+                                value="no"
+                                {{ request('banned') === 'no' ? 'selected' : '' }}>
+                                Not Banned
+                            </option>
+
+                        </select>
+
+                    </div>
+
 
                     {{-- Promoted --}}
                     <div class="col-lg-2 col-md-6">
@@ -347,6 +378,7 @@
     request()->filled('trusted') ||
     request()->filled('promoted') ||
     request()->filled('visibility') ||
+    request()->filled('banned') ||
     request()->filled('plan_id') ||
     request()->filled('sort');
     @endphp
@@ -434,6 +466,31 @@
                             ]) }}"
                         class="text-dark text-decoration-none ms-1"
                         title="Remove trusted filter">
+
+                        &times;
+
+                    </a>
+
+                </span>
+
+                @endif
+
+                {{-- Banned --}}
+
+                @if(request()->filled('banned'))
+
+                <span class="badge bg-danger d-flex align-items-center gap-1">
+
+                    Banned:
+                    {{ request('banned') === 'yes' ? 'Yes' : 'No' }}
+
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                'banned' => null,
+                'page' => null
+            ]) }}"
+                        class="text-white text-decoration-none ms-1"
+                        title="Remove banned filter">
 
                         &times;
 

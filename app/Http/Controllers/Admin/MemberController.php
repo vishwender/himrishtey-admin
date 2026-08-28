@@ -109,6 +109,28 @@ class MemberController extends Controller
             }
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Banned Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('banned')) {
+
+            if ($request->banned === 'yes') {
+
+                $query->where('active', 'Banned');
+            } elseif ($request->banned === 'no') {
+
+                $query->where(function ($q) {
+
+                    $q->where('active', 'Banned')
+                        ->orWhereNull('banned')
+                        ->orWhere('banned', '');
+                });
+            }
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -284,6 +306,26 @@ class MemberController extends Controller
         if (!$member) {
             abort(404, 'Member not found.');
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Staff Activity - Member Profile Viewed
+        |--------------------------------------------------------------------------
+        */
+
+        app(\App\Services\AdminActivityLogger::class)
+            ->log(
+                action: 'member_viewed',
+                description: "Viewed member profile {$member->profile_id}.",
+                module: 'members',
+                memberId: (int) $member->id,
+                subjectType: 'member',
+                subjectId: (int) $member->id,
+                metadata: [
+                    'profile_id' => $member->profile_id,
+                    'full_name' => $member->full_name,
+                ]
+            );
 
 
         /*
@@ -1692,11 +1734,51 @@ class MemberController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | Old Status
+    |--------------------------------------------------------------------------
+    */
+
+        $oldValue = $member->active;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Toggle Status
+    |--------------------------------------------------------------------------
+    */
+
         $member->active = $member->is_active
             ? 'No'
             : 'Yes';
 
         $member->save();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Staff Activity
+        |--------------------------------------------------------------------------
+        */
+
+        app(\App\Services\AdminActivityLogger::class)
+            ->log(
+                action: 'member_status_changed',
+                description: "Changed status of {$member->profile_id} from {$oldValue} to {$member->active}.",
+                module: 'members',
+                memberId: (int) $member->id,
+                subjectType: 'member',
+                subjectId: (int) $member->id,
+                metadata: [
+                    'profile_id' => $member->profile_id,
+                    'full_name' => $member->full_name,
+                    'old_value' => $oldValue,
+                    'new_value' => $member->active,
+                ]
+            );
+
 
         return back()->with(
             'success',
@@ -1715,12 +1797,52 @@ class MemberController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | Old Value
+    |--------------------------------------------------------------------------
+    */
+
+        $oldValue = $member->is_trusted;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Toggle Trusted
+    |--------------------------------------------------------------------------
+    */
+
         $member->is_trusted =
             strtolower((string) $member->is_trusted) === 'yes'
             ? 'No'
             : 'Yes';
 
         $member->save();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Staff Activity
+        |--------------------------------------------------------------------------
+        */
+
+        app(\App\Services\AdminActivityLogger::class)
+            ->log(
+                action: 'member_trusted_changed',
+                description: "Changed trusted status of {$member->profile_id} from {$oldValue} to {$member->is_trusted}.",
+                module: 'members',
+                memberId: (int) $member->id,
+                subjectType: 'member',
+                subjectId: (int) $member->id,
+                metadata: [
+                    'profile_id' => $member->profile_id,
+                    'full_name' => $member->full_name,
+                    'old_value' => $oldValue,
+                    'new_value' => $member->is_trusted,
+                ]
+            );
+
 
         return back()->with(
             'success',
@@ -1738,6 +1860,22 @@ class MemberController extends Controller
         $member = SiteMember::query()
             ->where('id', $id)
             ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Old Value
+        |--------------------------------------------------------------------------
+        */
+
+        $oldValue = $member->profile_hide;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Toggle Visibility
+        |--------------------------------------------------------------------------
+        */
 
         $currentlyHidden =
             strtolower((string) $member->profile_hide) === 'yes';
@@ -1759,6 +1897,32 @@ class MemberController extends Controller
 
         $member->save();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Staff Activity
+        |--------------------------------------------------------------------------
+        */
+
+        app(\App\Services\AdminActivityLogger::class)
+            ->log(
+                action: 'member_visibility_changed',
+                description: "Changed visibility of {$member->profile_id} from {$oldValue} to {$member->profile_hide}.",
+                module: 'members',
+                memberId: (int) $member->id,
+                subjectType: 'member',
+                subjectId: (int) $member->id,
+                metadata: [
+                    'profile_id' => $member->profile_id,
+                    'full_name' => $member->full_name,
+                    'old_value' => $oldValue,
+                    'new_value' => $member->profile_hide,
+                    'hidden_date' => $member->hidden_date,
+                    'hide_for_days' => $member->hide_for_days,
+                ]
+            );
+
+
         return back()->with('success', $message);
     }
 
@@ -1771,12 +1935,52 @@ class MemberController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Old Value
+        |--------------------------------------------------------------------------
+        */
+
+        $oldValue = $member->promoted;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Toggle Promoted
+        |--------------------------------------------------------------------------
+        */
+
         $member->promoted =
             strtolower((string) $member->promoted) === 'yes'
             ? 'No'
             : 'Yes';
 
         $member->save();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Staff Activity
+        |--------------------------------------------------------------------------
+        */
+
+        app(\App\Services\AdminActivityLogger::class)
+            ->log(
+                action: 'member_promoted_changed',
+                description: "Changed promoted status of {$member->profile_id} from {$oldValue} to {$member->promoted}.",
+                module: 'members',
+                memberId: (int) $member->id,
+                subjectType: 'member',
+                subjectId: (int) $member->id,
+                metadata: [
+                    'profile_id' => $member->profile_id,
+                    'full_name' => $member->full_name,
+                    'old_value' => $oldValue,
+                    'new_value' => $member->promoted,
+                ]
+            );
+
 
         return back()->with(
             'success',
@@ -2465,6 +2669,42 @@ class MemberController extends Controller
             $validated['partner_height_to_feet'],
             $validated['partner_height_to_inches']
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Detect Changed Fields
+        |--------------------------------------------------------------------------
+        */
+
+        $changes = [];
+
+        foreach ($validated as $field => $newValue) {
+
+            $oldValue = $member->{$field} ?? null;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Normalize Values For Comparison
+            |--------------------------------------------------------------------------
+            */
+
+            $oldCompare = is_null($oldValue)
+                ? ''
+                : trim((string) $oldValue);
+
+            $newCompare = is_null($newValue)
+                ? ''
+                : trim((string) $newValue);
+
+
+            if ($oldCompare !== $newCompare) {
+
+                $changes[$field] = [
+                    'old' => $oldValue,
+                    'new' => $newValue,
+                ];
+            }
+        }
         /*
         |--------------------------------------------------------------------------
         | Update Member
@@ -2475,6 +2715,29 @@ class MemberController extends Controller
             ->where('id', $id)
             ->update($validated);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Staff Activity - Member Updated
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($changes)) {
+
+            app(\App\Services\AdminActivityLogger::class)
+                ->log(
+                    action: 'member_updated',
+                    description: "Updated member profile {$member->profile_id}.",
+                    module: 'members',
+                    memberId: (int) $member->id,
+                    subjectType: 'member',
+                    subjectId: (int) $member->id,
+                    metadata: [
+                        'profile_id' => $member->profile_id,
+                        'full_name' => $member->full_name,
+                        'changes' => $changes,
+                    ]
+                );
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -2663,6 +2926,12 @@ class MemberController extends Controller
 
     public function updateRemarks(Request $request, $memberId)
     {
+        /*
+    |--------------------------------------------------------------------------
+    | Validate
+    |--------------------------------------------------------------------------
+    */
+
         $validated = $request->validate([
             'remarks' => [
                 'nullable',
@@ -2670,6 +2939,13 @@ class MemberController extends Controller
                 'max:10000',
             ],
         ]);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Find Member
+    |--------------------------------------------------------------------------
+    */
 
         $member = DB::connection('site')
             ->table('members')
@@ -2680,16 +2956,67 @@ class MemberController extends Controller
             abort(404, 'Member not found.');
         }
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | Old / New Remark
+    |--------------------------------------------------------------------------
+    */
+
+        $oldRemarks = $member->remarks;
+
+        $newRemarks = $validated['remarks'] ?? null;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Update Remarks
+    |--------------------------------------------------------------------------
+    */
+
         DB::connection('site')
             ->table('members')
             ->where('id', $memberId)
             ->update([
-                'remarks' => $validated['remarks'] ?? null,
+                'remarks' => $newRemarks,
             ]);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Staff Activity
+    |--------------------------------------------------------------------------
+    */
+
+        app(\App\Services\AdminActivityLogger::class)
+            ->log(
+                action: 'remarks_updated',
+                description: "Updated remarks for {$member->profile_id}.",
+                module: 'members',
+                memberId: (int) $member->id,
+                subjectType: 'member',
+                subjectId: (int) $member->id,
+                metadata: [
+                    'profile_id' => $member->profile_id,
+                    'full_name' => $member->full_name,
+                    'old_remarks' => $oldRemarks,
+                    'new_remarks' => $newRemarks,
+                ]
+            );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Redirect
+    |--------------------------------------------------------------------------
+    */
 
         return redirect()
             ->back()
-            ->with('success', 'Member remarks updated successfully.');
+            ->with(
+                'success',
+                'Member remarks updated successfully.'
+            );
     }
 
     public function storeRotation(Request $request, $memberId)

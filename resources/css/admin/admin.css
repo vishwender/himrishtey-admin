@@ -481,6 +481,13 @@ h6,
     border-color: var(--app-border);
 }
 
+/* Bootstrap background utilities use !important and otherwise keep card
+   headings white when the admin theme is dark. */
+[data-theme="dark"] .card-header.bg-white,
+[data-theme="dark"] .card-footer.bg-white {
+    background-color: var(--app-surface) !important;
+}
+
 [data-theme="dark"] .card {
     box-shadow:
         0 8px 24px rgba(0, 0, 0, .18) !important;
@@ -515,6 +522,16 @@ h6,
     --bs-table-color: var(--app-ink);
     --bs-table-hover-bg: #252a40;
     --bs-table-border-color: var(--app-border);
+}
+
+[data-theme="dark"] .table-light {
+    --bs-table-bg: #252a40;
+    --bs-table-color: #aeb4c9;
+    --bs-table-border-color: var(--app-border);
+    --bs-table-striped-bg: #292e46;
+    --bs-table-striped-color: var(--app-ink);
+    --bs-table-hover-bg: #303650;
+    --bs-table-hover-color: var(--app-ink);
 }
 
 [data-theme="dark"] .table thead th {

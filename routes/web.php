@@ -31,6 +31,13 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\MemberRotationController;
+use App\Http\Controllers\Admin\DeleteProfileRequestController;
+use App\Http\Controllers\Admin\ProfileRangeController;
+use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\OfferController;
+use App\Http\Controllers\Admin\WalletOfferController;
+use App\Http\Controllers\Admin\StaffActivityController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -617,6 +624,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 [CityController::class, 'destroy']
             )->name('cities.destroy');
 
+            //Profile Ranges
+
+            Route::get(
+                '/profile-ranges',
+                [ProfileRangeController::class, 'index']
+            )->name('profile-ranges.index');
+
+            Route::post(
+                '/profile-ranges',
+                [ProfileRangeController::class, 'store']
+            )->name('profile-ranges.store');
+
+            Route::put(
+                '/profile-ranges/{id}',
+                [ProfileRangeController::class, 'update']
+            )->name('profile-ranges.update');
+
             Route::get(
                 '/membership-types',
                 [MembershipTypeController::class, 'index']
@@ -713,6 +737,89 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     'status'
                 ])->name('status');
             }); // success stories end here
+
+            //delete profile request
+            Route::get(
+                '/delete-profile-requests',
+                [DeleteProfileRequestController::class, 'index']
+            )->name('delete-profile-requests.index');
+
+            Route::post(
+                '/delete-profile-requests/{id}/accept',
+                [DeleteProfileRequestController::class, 'accept']
+            )->name('delete-profile-requests.accept');
+
+            Route::post(
+                '/delete-profile-requests/{id}/reject',
+                [DeleteProfileRequestController::class, 'reject']
+            )->name('delete-profile-requests.reject');
+
+            //Payments
+            Route::get(
+                '/payments',
+                [PaymentController::class, 'index']
+            )
+                ->middleware('permission:view-payments')
+                ->name('payments.index');
+
+            //Offers
+            Route::get(
+                '/offers',
+                [OfferController::class, 'index']
+            )->name('offers.index');
+
+            Route::post(
+                '/offers',
+                [OfferController::class, 'store']
+            )->name('offers.store');
+
+            Route::put(
+                '/offers/{id}',
+                [OfferController::class, 'update']
+            )->name('offers.update');
+
+            Route::delete(
+                '/offers/{id}',
+                [OfferController::class, 'destroy']
+            )->name('offers.destroy');
+
+            Route::patch(
+                '/offers/{id}/toggle-status',
+                [OfferController::class, 'toggleStatus']
+            )->name('offers.toggle-status');
+
+            //Wallet Offers
+            Route::get(
+                '/wallet-offers',
+                [WalletOfferController::class, 'index']
+            )->name('wallet-offers.index');
+
+            Route::post(
+                '/wallet-offers',
+                [WalletOfferController::class, 'store']
+            )->name('wallet-offers.store');
+
+            Route::put(
+                '/wallet-offers/{id}',
+                [WalletOfferController::class, 'update']
+            )->name('wallet-offers.update');
+
+            Route::delete(
+                '/wallet-offers/{id}',
+                [WalletOfferController::class, 'destroy']
+            )->name('wallet-offers.destroy');
+
+            Route::get(
+                '/staff-activity',
+                [StaffActivityController::class, 'index']
+            )->name('staff-activity.index');
+
+            Route::get(
+                '/staff/{admin}/activity',
+                [StaffActivityController::class, 'show']
+            )
+                ->middleware('permission:view-staff-activity')
+                ->name('staff.activity');
 
             Route::prefix('blog-posts')
                 ->name('blog-posts.')

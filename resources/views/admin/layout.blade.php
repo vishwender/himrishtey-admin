@@ -23,10 +23,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
 
+    <script>
+        if (localStorage.getItem('admin-theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+        }
+    </script>
+
     <!-- <link rel="stylesheet" href="{{asset('admin/css/admin.css') }}"> -->
     <!-- <script src="{{asset('admin/js/admin.js')}}"></script> -->
     @vite('resources/css/admin/admin.css')
     @vite('resources/css/admin/dashboard/dashboard.css')
+    @vite('resources/js/admin/admin.js')
     @stack('styles')
 
 </head>
@@ -213,6 +221,19 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                         </a>
 
+                        <a
+                            href="{{ route('admin.profile-ranges.index') }}"
+                            class="nav-dropdown-item
+                            {{ request()->routeIs('admin.profile-ranges.*')
+                            ? 'active'
+                            : '' }}">
+
+                            <i class="bi bi-sliders me-2"></i>
+
+                            Profile Ranges
+
+                        </a>
+
                     </div>
 
                 </div>
@@ -384,6 +405,37 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                 </div>
 
+                @if(auth('admin')->user()?->hasPermission('view-payments'))
+
+                <a
+                    href="{{ route('admin.payments.index') }}"
+                    class="nav-dropdown-item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
+
+                    <i class="bi bi-credit-card me-2"></i>
+                    Payments
+                </a>
+
+                @endif
+
+                <a
+                    href="{{ route('admin.offers.index') }}"
+                    class="nav-dropdown-item {{ request()->routeIs('admin.offers.*') ? 'active' : '' }}">
+
+                    <i class="bi bi-tags me-2"></i>
+                    Offers
+
+                </a>
+
+                <a
+                    href="{{ route('admin.wallet-offers.index') }}"
+                    class="nav-dropdown-item {{ request()->routeIs('admin.wallet-offers.*') ? 'active' : '' }}">
+
+                    <i class="bi bi-wallet2 me-2"></i>
+
+                    Wallet Offers
+
+                </a>
+
                 <a href="#">
                     <i class="bi bi-person-badge me-2"></i>
                     Agents
@@ -446,7 +498,12 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                     </div>
 
                 </div>
-
+                <a
+                    href="{{ route('admin.delete-profile-requests.index') }}"
+                    class="nav-dropdown-item {{ request()->routeIs('admin.delete-profile-requests.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-x me-2"></i>
+                    Delete Profile Requests
+                </a>
                 <a href="{{ route('admin.user-ratings.index') }}"
                     class="{{ request()->routeIs('admin.user-ratings.*') ? 'active' : '' }}">
 
