@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div class="mt-3 mt-md-0">
+        <div class="mt-3 mt-md-0 d-flex flex-wrap gap-2">
 
             @php
             $backUrl = route('admin.members.index');
@@ -81,6 +81,15 @@
             }
             }
             @endphp
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#shareProfileModal">
+                <i class="bi bi-share me-1"></i>
+                Share Profile
+            </button>
 
             <a
                 href="{{ $backUrl }}"
@@ -3513,6 +3522,73 @@
 
     </div>
 
+    <div
+        class="modal fade"
+        id="shareProfileModal"
+        tabindex="-1"
+        aria-labelledby="shareProfileModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="shareProfileModalLabel">
+                            Share {{ $member->full_name }}'s Profile
+                        </h5>
+                        <div class="small text-muted mt-1">
+                            This secure link expires in 7 days and hides contact details.
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <label for="sharedProfileUrl" class="form-label">
+                        Shareable profile link
+                    </label>
+
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="sharedProfileUrl"
+                            class="form-control"
+                            value="{{ $shareUrl }}"
+                            readonly>
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            id="copySharedProfileUrl">
+                            <i class="bi bi-copy me-1"></i>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <a
+                        href="{{ $whatsappShareUrl }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-success">
+                        <i class="bi bi-whatsapp me-1"></i>
+                        Share on WhatsApp
+                    </a>
+                    <a
+                        href="{{ $shareUrl }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-outline-secondary">
+                        Preview
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @endsection
 
     {{-- =========================================================
@@ -3890,6 +3966,35 @@
         });
     </script>
 
+    @endpush
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const copyButton = document.getElementById('copySharedProfileUrl');
+            const shareInput = document.getElementById('sharedProfileUrl');
+
+            if (!copyButton || !shareInput) {
+                return;
+            }
+
+            copyButton.addEventListener('click', async function () {
+                try {
+                    await navigator.clipboard.writeText(shareInput.value);
+                } catch (error) {
+                    shareInput.select();
+                    document.execCommand('copy');
+                }
+
+                const label = copyButton.querySelector('span');
+                label.textContent = 'Copied';
+
+                setTimeout(function () {
+                    label.textContent = 'Copy';
+                }, 1800);
+            });
+        });
+    </script>
     @endpush
 
     @push('scripts')

@@ -37,6 +37,15 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\Admin\WalletOfferController;
 use App\Http\Controllers\Admin\StaffActivityController;
+use App\Http\Controllers\SharedProfileController;
+
+
+Route::get('/shared-profile/{site}/{member}', [
+    SharedProfileController::class,
+    'show',
+])->middleware(['signed', 'throttle:60,1'])
+    ->whereNumber(['site', 'member'])
+    ->name('shared-profile.show');
 
 
 /*

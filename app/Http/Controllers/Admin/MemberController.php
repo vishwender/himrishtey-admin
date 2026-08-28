@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Models\Member;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
 
 
@@ -782,6 +783,19 @@ class MemberController extends Controller
 
         $returnUrl = $request->get('return');
 
+        $shareUrl = URL::temporarySignedRoute(
+            'shared-profile.show',
+            now()->addDays(7),
+            [
+                'site' => app(\App\Services\SiteManager::class)->id(),
+                'member' => $member->id,
+            ]
+        );
+
+        $whatsappShareUrl = 'https://wa.me/?text=' . rawurlencode(
+            "View {$member->full_name}'s profile: {$shareUrl}"
+        );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -809,6 +823,8 @@ class MemberController extends Controller
             'activityCounts' => $activityCounts,
             'relationshipManagers' => $relationshipManagers,
             'returnUrl' => $returnUrl,
+            'shareUrl' => $shareUrl,
+            'whatsappShareUrl' => $whatsappShareUrl,
         ]);
     }
 
