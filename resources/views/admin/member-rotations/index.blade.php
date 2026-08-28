@@ -5,12 +5,41 @@
 @section('content')
 
 @php
+
 $currentAdmin = auth('admin')->user();
 
-$isSuperAdmin = $currentAdmin
-? $currentAdmin->hasRole('super-admin')
+/*
+|--------------------------------------------------------------------------
+| Admin Permissions
+|--------------------------------------------------------------------------
+*/
+
+$canViewAllRotations = $currentAdmin
+? $currentAdmin->hasPermission('view-all-rotations')
 : false;
+
+$canViewOwnRotations = $currentAdmin
+? $currentAdmin->hasPermission('view-own-rotations')
+: false;
+
+$canCreateRotations = $currentAdmin
+? $currentAdmin->hasPermission('create-rotations')
+: false;
+
+$canEditRotations = $currentAdmin
+? $currentAdmin->hasPermission('edit-rotations')
+: false;
+
+$canCompleteRotations = $currentAdmin
+? $currentAdmin->hasPermission('complete-rotations')
+: false;
+
+$canCancelRotations = $currentAdmin
+? $currentAdmin->hasPermission('cancel-rotations')
+: false;
+
 @endphp
+
 
 <div class="container-fluid">
 
@@ -21,6 +50,7 @@ $isSuperAdmin = $currentAdmin
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
+
             <h1 class="h3 mb-1">
                 Member Rotations
             </h1>
@@ -28,16 +58,55 @@ $isSuperAdmin = $currentAdmin
             <p class="text-muted mb-0">
                 Manage and monitor scheduled member rotations.
             </p>
+
         </div>
 
-        <a
-            href="{{ route('admin.members.index') }}"
-            class="btn btn-outline-secondary">
+    </div>
 
-            <i class="bi bi-people me-1"></i>
-            Members
 
-        </a>
+    {{-- =========================================================
+         Access Information
+    ========================================================== --}}
+
+    <div class="mb-4">
+
+        @if($canViewAllRotations)
+
+        <div class="alert alert-info d-flex align-items-center mb-0">
+
+            <i class="bi bi-shield-check fs-5 me-2"></i>
+
+            <div>
+
+                <strong>All Rotations</strong>
+
+                <div class="small">
+                    You have permission to view rotations assigned to all administrators.
+                </div>
+
+            </div>
+
+        </div>
+
+        @elseif($canViewOwnRotations)
+
+        <div class="alert alert-light border d-flex align-items-center mb-0">
+
+            <i class="bi bi-person-check fs-5 me-2"></i>
+
+            <div>
+
+                <strong>My Rotations</strong>
+
+                <div class="small text-muted">
+                    You are viewing only rotations assigned to you.
+                </div>
+
+            </div>
+
+        </div>
+
+        @endif
 
     </div>
 
@@ -48,8 +117,9 @@ $isSuperAdmin = $currentAdmin
 
     <div class="row g-3 mb-4">
 
+
         {{-- =====================================================
-             Total Rotations
+             Total
         ====================================================== --}}
 
         <div class="col-xl-3 col-md-6">
@@ -207,10 +277,11 @@ $isSuperAdmin = $currentAdmin
 
 
     {{-- =========================================================
-         Scheduled Rotations
+         Rotations Table
     ========================================================== --}}
 
     <div class="card border-0 shadow-sm">
+
 
         {{-- =====================================================
              Card Header
@@ -232,11 +303,13 @@ $isSuperAdmin = $currentAdmin
 
                 </div>
 
+
                 <div>
 
                     <span class="badge bg-light text-dark border">
 
                         {{ $totalRotations }}
+
                         {{ $totalRotations == 1 ? 'Rotation' : 'Rotations' }}
 
                     </span>
@@ -297,6 +370,7 @@ $isSuperAdmin = $currentAdmin
 
                     <tbody>
 
+
                         @forelse($rotations as $rotation)
 
                         @php
@@ -307,8 +381,7 @@ $isSuperAdmin = $currentAdmin
                         |--------------------------------------------------------------------------
                         */
 
-                        $rotationDate =
-                        $rotation->next_rotation_at;
+                        $rotationDate = $rotation->next_rotation_at;
 
 
                         /*
@@ -339,11 +412,10 @@ $isSuperAdmin = $currentAdmin
                         | Assigned Admin
                         |--------------------------------------------------------------------------
                         |
-                        | IMPORTANT:
-                        | Admins are stored in the central database.
-                        | We therefore use the $admins collection
-                        | loaded by the controller instead of
-                        | $rotation->user.
+                        | Admins live in the CENTRAL database.
+                        |
+                        | Therefore we use the $admins collection
+                        | supplied by the controller.
                         |
                         */
 
@@ -359,12 +431,11 @@ $isSuperAdmin = $currentAdmin
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Database Status
+                        | Status
                         |--------------------------------------------------------------------------
                         */
 
-                        $status =
-                        strtolower(
+                        $status = strtolower(
                         trim(
                         $rotation->status ?? 'pending'
                         )
@@ -374,6 +445,7 @@ $isSuperAdmin = $currentAdmin
 
 
                         <tr>
+
 
                             {{-- =================================================
                                  Member
@@ -385,8 +457,6 @@ $isSuperAdmin = $currentAdmin
 
                                 <div class="d-flex align-items-center">
 
-                                    {{-- Avatar --}}
-
                                     <div
                                         class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2 flex-shrink-0"
                                         style="width:40px;height:40px;">
@@ -396,8 +466,6 @@ $isSuperAdmin = $currentAdmin
                                     </div>
 
 
-                                    {{-- Member Information --}}
-
                                     <div>
 
                                         <div class="fw-semibold">
@@ -405,6 +473,7 @@ $isSuperAdmin = $currentAdmin
                                             {{ $rotation->member->full_name }}
 
                                         </div>
+
 
                                         <small class="text-muted">
 
@@ -418,8 +487,6 @@ $isSuperAdmin = $currentAdmin
 
                                 @else
 
-                                {{-- Missing Member --}}
-
                                 <div class="d-flex align-items-center">
 
                                     <div
@@ -430,6 +497,7 @@ $isSuperAdmin = $currentAdmin
 
                                     </div>
 
+
                                     <div>
 
                                         <div class="fw-semibold text-muted">
@@ -437,6 +505,7 @@ $isSuperAdmin = $currentAdmin
                                             Member Removed
 
                                         </div>
+
 
                                         <small class="text-muted">
 
@@ -478,7 +547,7 @@ $isSuperAdmin = $currentAdmin
 
 
                             {{-- =================================================
-                                 Assigned To
+                                 Assigned Admin
                             ================================================== --}}
 
                             <td>
@@ -495,6 +564,7 @@ $isSuperAdmin = $currentAdmin
 
                                     </div>
 
+
                                     <div>
 
                                         <div class="fw-semibold">
@@ -502,6 +572,7 @@ $isSuperAdmin = $currentAdmin
                                             {{ $assignedAdmin->name }}
 
                                         </div>
+
 
                                         <small class="text-muted">
 
@@ -516,9 +587,7 @@ $isSuperAdmin = $currentAdmin
                                 @else
 
                                 <span class="text-muted">
-
                                     Unassigned
-
                                 </span>
 
                                 @endif
@@ -527,7 +596,7 @@ $isSuperAdmin = $currentAdmin
 
 
                             {{-- =================================================
-                                 Rotation Date / Time
+                                 Rotation Date
                             ================================================== --}}
 
                             <td>
@@ -540,14 +609,13 @@ $isSuperAdmin = $currentAdmin
 
                                 </div>
 
+
                                 <small class="text-muted">
 
                                     {{ $rotationDate->format('h:i A') }}
 
                                 </small>
 
-
-                                {{-- Timing Badge --}}
 
                                 <div class="mt-1">
 
@@ -720,6 +788,7 @@ $isSuperAdmin = $currentAdmin
                                         ====================================== --}}
 
                                         @if(
+                                        $canCompleteRotations &&
                                         !$rotation->completed_at &&
                                         $status !== 'completed' &&
                                         $status !== 'cancelled'
@@ -746,10 +815,11 @@ $isSuperAdmin = $currentAdmin
 
 
                                         {{-- =====================================
-                                             Reschedule
+                                             Reschedule / Edit
                                         ====================================== --}}
 
                                         @if(
+                                        $canEditRotations &&
                                         !$rotation->completed_at &&
                                         $status !== 'completed' &&
                                         $status !== 'cancelled'
@@ -776,29 +846,60 @@ $isSuperAdmin = $currentAdmin
 
 
                                         {{-- =====================================
-                                             Divider
+                                             Cancel Rotation
                                         ====================================== --}}
 
                                         @if(
-                                        $rotation->member &&
-                                        (
-                                        !$rotation->completed_at ||
-                                        $status === 'completed'
-                                        )
+                                        $canCancelRotations &&
+                                        !$rotation->completed_at &&
+                                        $status !== 'completed' &&
+                                        $status !== 'cancelled'
                                         )
 
                                         <li>
-                                            <hr class="dropdown-divider">
+
+                                            <button
+                                                type="button"
+                                                class="dropdown-item text-danger"
+                                                data-rotation-id="{{ $rotation->id }}">
+
+                                                <i
+                                                    class="bi bi-x-circle me-2">
+                                                </i>
+
+                                                Cancel Rotation
+
+                                            </button>
+
                                         </li>
 
                                         @endif
 
 
                                         {{-- =====================================
-                                             Member Profile
+                                             Divider
                                         ====================================== --}}
 
                                         @if($rotation->member)
+
+                                        <li>
+
+                                            <hr class="dropdown-divider">
+
+                                        </li>
+
+                                        @endif
+
+
+                                        {{-- =====================================
+                                             Edit Member
+                                        ====================================== --}}
+
+                                        @if(
+                                        $rotation->member &&
+                                        $currentAdmin &&
+                                        $currentAdmin->hasPermission('edit-members')
+                                        )
 
                                         <li>
 
@@ -848,12 +949,28 @@ $isSuperAdmin = $currentAdmin
                                         class="bi bi-arrow-repeat fs-1 d-block mb-3">
                                     </i>
 
+
                                     <h5>
                                         No rotations found
                                     </h5>
 
+
                                     <p class="mb-0">
+
+                                        @if($canViewAllRotations)
+
                                         There are currently no scheduled rotations.
+
+                                        @elseif($canViewOwnRotations)
+
+                                        You currently have no rotations assigned to you.
+
+                                        @else
+
+                                        You do not have permission to view rotations.
+
+                                        @endif
+
                                     </p>
 
                                 </div>
@@ -883,6 +1000,7 @@ $isSuperAdmin = $currentAdmin
 
             <div
                 class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+
 
                 {{-- Pagination Information --}}
 

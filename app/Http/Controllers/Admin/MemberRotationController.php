@@ -3,125 +3,290 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
+use App\Models\Member;
 use App\Models\MemberRotation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MemberRotationController extends Controller
 {
-    public function index()
+    /**
+     * Display rotations.
+     */
+    public function index(Request $request)
     {
-
-        $admin = auth('admin')->user();
+        $admin = Auth::guard('admin')->user();
 
         if (!$admin) {
-            abort(403, 'Admin authentication required.');
+            return redirect()->route('admin.login');
         }
-        dd($admin);
-        $isSuperAdmin = $admin->hasRole('super-admin');
 
-        $today = now()->startOfDay();
+        /*
+        |--------------------------------------------------------------------------
+        | Permissions
+        |--------------------------------------------------------------------------
+        */
 
-        $tomorrow = now()->copy()
-            ->addDay()
-            ->startOfDay();
+        $canViewAll = $admin->hasPermission('view-all-rotations');
 
-        $dayAfterTomorrow = now()->copy()
-            ->addDays(2)
-            ->startOfDay();
+        $canViewOwn = $admin->hasPermission('view-own-rotations');
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Base Query
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Rotations Query
+        |--------------------------------------------------------------------------
+        */
 
-        $query = MemberRotation::with('member');
+        $query = MemberRotation::query()
+            ->with('member')
+            ->orderBy('next_rotation_at', 'asc');
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Access Control
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Access Control
+        |--------------------------------------------------------------------------
+        */
 
-        $admin = auth()->user();
+        if ($canViewAll) {
 
-        $isSuperAdmin = $admin->hasRole('super-admin');
+            // Can see all rotations.
 
-        if (!$isSuperAdmin) {
+        } elseif ($canViewOwn) {
 
+            // Can only see rotations assigned to logged-in admin.
             $query->where('user_id', $admin->id);
+        } else {
+
+            // No access.
+            $query->whereRaw('1 = 0');
         }
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Statistics
-    |--------------------------------------------------------------------------
-    */
-
-        $statsQuery = clone $query;
-
-        $totalRotations = (clone $statsQuery)->count();
-
-        $todayRotations = (clone $statsQuery)
-            ->whereBetween('next_rotation_at', [
-                $today,
-                $today->copy()->endOfDay()
-            ])
-            ->count();
-
-        $tomorrowRotations = (clone $statsQuery)
-            ->whereBetween('next_rotation_at', [
-                $tomorrow,
-                $tomorrow->copy()->endOfDay()
-            ])
-            ->count();
-
-        $nextTwoDaysRotations = (clone $statsQuery)
-            ->whereBetween('next_rotation_at', [
-                $tomorrow,
-                $dayAfterTomorrow->copy()->endOfDay()
-            ])
-            ->count();
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | Rotations
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Pagination
+        |--------------------------------------------------------------------------
+        */
 
         $rotations = $query
-            ->orderBy('next_rotation_at', 'asc')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Load Admins From Central Database
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Admins
+        |--------------------------------------------------------------------------
+        |
+        | Admins are stored in the central database.
+        |
+        */
 
-        $adminIds = $rotations
-            ->pluck('user_id')
-            ->filter()
-            ->unique()
-            ->values();
-
-        $admins = Admin::whereIn('id', $adminIds)
+        $admins = Admin::query()
+            ->where('status', true)
+            ->orderBy('name')
             ->get()
             ->keyBy('id');
 
 
-        return view('admin.rotations.index', compact(
-            'rotations',
-            'admins',
-            'totalRotations',
-            'todayRotations',
-            'tomorrowRotations',
-            'nextTwoDaysRotations'
-        ));
+        /*
+        |--------------------------------------------------------------------------
+        | Summary Query
+        |--------------------------------------------------------------------------
+        */
+
+        $summaryQuery = MemberRotation::query();
+
+
+        if ($canViewAll) {
+
+            // All rotations.
+
+        } elseif ($canViewOwn) {
+
+            $summaryQuery->where(
+                'user_id',
+                $admin->id
+            );
+        } else {
+
+            $summaryQuery->whereRaw('1 = 0');
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Summary Counts
+        |--------------------------------------------------------------------------
+        */
+
+        $totalRotations = (clone $summaryQuery)
+            ->count();
+
+
+        $todayRotations = (clone $summaryQuery)
+            ->whereDate(
+                'next_rotation_at',
+                today()
+            )
+            ->count();
+
+
+        $tomorrowRotations = (clone $summaryQuery)
+            ->whereDate(
+                'next_rotation_at',
+                now()->addDay()->toDateString()
+            )
+            ->count();
+
+
+        $nextTwoDaysRotations = (clone $summaryQuery)
+            ->whereBetween(
+                'next_rotation_at',
+                [
+                    now()->startOfDay(),
+                    now()->addDays(2)->endOfDay(),
+                ]
+            )
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return Listing View
+        |--------------------------------------------------------------------------
+        |
+        | IMPORTANT:
+        | Do NOT pass $member here.
+        |
+        */
+
+        return view(
+            'admin.member-rotations.index',
+            compact(
+                'rotations',
+                'admins',
+                'totalRotations',
+                'todayRotations',
+                'tomorrowRotations',
+                'nextTwoDaysRotations',
+                'canViewAll',
+                'canViewOwn'
+            )
+        );
+    }
+
+
+    /**
+     * Show create rotation form for a member.
+     */
+    public function create()
+    {
+
+        return view('admin.member-rotations.create');
+    }
+
+
+    /**
+     * Store rotation.
+     */
+    public function store(
+        Request $request,
+        $memberId
+    ) {
+        $admin = Auth::guard('admin')->user();
+
+        if (!$admin) {
+            return redirect()->route('admin.login');
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Permission
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$admin->hasPermission('create-rotations')) {
+            abort(403, 'You do not have permission to create rotations.');
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Member
+        |--------------------------------------------------------------------------
+        */
+
+        $member = Member::findOrFail($memberId);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
+
+        $validated = $request->validate([
+            'user_id' => [
+                'required',
+                'integer',
+            ],
+
+            'days' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:365',
+            ],
+
+            'time' => [
+                'nullable',
+                'date_format:H:i',
+            ],
+
+            'next_rotation_at' => [
+                'required',
+                'date',
+            ],
+
+            'status' => [
+                'nullable',
+                'in:pending,completed,cancelled',
+            ],
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Rotation
+        |--------------------------------------------------------------------------
+        */
+
+        MemberRotation::create([
+            'member_id' => $member->id,
+            'user_id' => $validated['user_id'],
+            'days' => $validated['days'],
+            'time' => $validated['time'] ?? null,
+            'next_rotation_at' => $validated['next_rotation_at'],
+            'status' => $validated['status'] ?? 'pending',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route('admin.rotations.index')
+            ->with(
+                'success',
+                'Rotation created successfully.'
+            );
     }
 }

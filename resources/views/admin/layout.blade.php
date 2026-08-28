@@ -268,10 +268,20 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                         </a>
 
+                        {{-- Rotations --}}
+                        <a
+                            href="{{ route('admin.rotations.index') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.members.advanced-search') ? 'active' : '' }}">
+
+                            <i class="bi bi-arrow-repeat me-2"></i>
+
+                            Rotations
+
+                        </a>
+
                     </div>
 
                 </div>
-
 
                 <div class="nav-dropdown {{ request()->routeIs('admin.membership-types.*') || request()->routeIs('admin.membership-plans.*') ? 'is-open' : '' }}">
 

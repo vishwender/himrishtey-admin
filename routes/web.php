@@ -219,20 +219,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 [MemberController::class, 'storeRotation']
             )->name('members.rotation.store');
 
-            Route::post(
-                '/members/{memberId}/rotation',
-                [MemberController::class, 'createRotation']
-            )->name('members.rotation.create');
+            // =========================================================
+            // Member Rotations
+            // =========================================================
 
-            Route::get(
-                '/members/rotations',
-                [MemberRotationController::class, 'index']
-            )->name('admin.members.rotations');
-
+            // Rotation listing
             Route::get(
                 '/rotations',
                 [MemberRotationController::class, 'index']
-            )->name('admin.rotations.index');
+            )->name('rotations.index');
 
             /*
             |--------------------------------------------------------------------------
