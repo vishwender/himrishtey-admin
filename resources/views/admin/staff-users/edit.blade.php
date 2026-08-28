@@ -260,7 +260,7 @@
 
                     @php
                     $currentSiteIds = old(
-                    'site_ids',
+                    'sites',
                     $admin->sites->pluck('id')->toArray()
                     );
                     @endphp
@@ -272,7 +272,7 @@
                         <input
                             class="form-check-input"
                             type="checkbox"
-                            name="site_ids[]"
+                            name="sites[]"
                             value="{{ $site->id }}"
                             id="site_{{ $site->id }}"
                             {{ in_array($site->id, $currentSiteIds) ? 'checked' : '' }}>
