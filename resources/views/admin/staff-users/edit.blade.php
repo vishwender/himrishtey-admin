@@ -242,7 +242,7 @@
 
             </div>
 
-            <div class="card">
+            <div class="card staff-access-card">
 
                 <div class="card-header bg-transparent">
 
@@ -267,7 +267,7 @@
 
                     @forelse($sites as $site)
 
-                    <div class="form-check mb-3">
+                    <div class="form-check staff-site-option">
 
                         <input
                             class="form-check-input"

@@ -47,7 +47,7 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
     <div class="admin-wrapper d-flex">
 
         {{-- Sidebar --}}
-        <aside class="sidebar">
+        <aside class="sidebar" id="adminSidebar">
 
             <div class="brand">
                 {{$currentSite->name}} Admin
@@ -238,12 +238,12 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                 </div>
 
-                <div class="nav-dropdown {{ request()->routeIs('admin.members.*') ? 'is-open' : '' }}">
+                <div class="nav-dropdown {{ request()->routeIs('admin.members.*') || request()->routeIs('admin.rotations.*') ? 'is-open' : '' }}">
 
                     <button
                         type="button"
                         class="nav-dropdown-toggle"
-                        aria-expanded="{{ request()->routeIs('admin.members.*') ? 'true' : 'false' }}">
+                        aria-expanded="{{ request()->routeIs('admin.members.*') || request()->routeIs('admin.rotations.*') ? 'true' : 'false' }}">
 
                         <i class="bi bi-people me-2"></i>
 
@@ -292,7 +292,7 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                         {{-- Rotations --}}
                         <a
                             href="{{ route('admin.rotations.index') }}"
-                            class="nav-dropdown-item {{ request()->routeIs('admin.members.advanced-search') ? 'active' : '' }}">
+                            class="nav-dropdown-item {{ request()->routeIs('admin.rotations.*') ? 'active' : '' }}">
 
                             <i class="bi bi-arrow-repeat me-2"></i>
 
@@ -550,7 +550,17 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                 <div class="d-flex justify-content-between align-items-center">
 
-                    <div>
+                    <div class="d-flex align-items-center gap-3">
+
+                        <button
+                            type="button"
+                            id="sidebarToggle"
+                            class="btn btn-light sidebar-toggle"
+                            aria-label="Hide sidebar"
+                            aria-controls="adminSidebar"
+                            aria-expanded="true">
+                            <i class="bi bi-layout-sidebar-inset"></i>
+                        </button>
 
                         <strong>
                             @yield('page-title', 'Admin Dashboard')

@@ -2672,6 +2672,23 @@ class MemberController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Respect The Existing Site Schema
+        |--------------------------------------------------------------------------
+        |
+        | Laravel converts empty form inputs to null. Some legacy site databases
+        | define optional member fields as NOT NULL, so normalize only those
+        | fields while leaving genuinely nullable columns untouched.
+        |
+        */
+
+        $validated = $this->normalizeMemberValuesForSchema(
+            $validated,
+            $member,
+            $db
+        );
+
+        /*
+        |--------------------------------------------------------------------------
         | Detect Changed Fields
         |--------------------------------------------------------------------------
         */
@@ -2748,6 +2765,75 @@ class MemberController extends Controller
         return redirect()
             ->route('admin.members.show', $id)
             ->with('success', 'Member profile updated successfully.');
+    }
+
+    /**
+     * Make submitted values compatible with the selected site's members table
+     * without changing that database's schema.
+     */
+    private function normalizeMemberValuesForSchema(
+        array $values,
+        object $member,
+        $connection
+    ): array {
+        $columns = collect(
+            $connection->getSchemaBuilder()->getColumns('members')
+        )->keyBy('name');
+
+        $numericTypes = [
+            'bigint',
+            'decimal',
+            'double',
+            'float',
+            'int',
+            'integer',
+            'mediumint',
+            'numeric',
+            'real',
+            'smallint',
+            'tinyint',
+        ];
+
+        $dateTypes = [
+            'date',
+            'datetime',
+            'time',
+            'timestamp',
+            'year',
+        ];
+
+        foreach ($values as $field => $value) {
+            if ($value !== null) {
+                continue;
+            }
+
+            $column = $columns->get($field);
+
+            if (!$column || $column['nullable']) {
+                continue;
+            }
+
+            if ($column['default'] !== null) {
+                $values[$field] = $column['default'];
+                continue;
+            }
+
+            $type = strtolower($column['type_name']);
+
+            if (in_array($type, $numericTypes, true)) {
+                $values[$field] = 0;
+            } elseif (
+                in_array($type, $dateTypes, true) ||
+                in_array($type, ['enum', 'json', 'set'], true)
+            ) {
+                // Empty strings can be invalid for these types in strict MySQL.
+                $values[$field] = $member->{$field};
+            } else {
+                $values[$field] = '';
+            }
+        }
+
+        return $values;
     }
 
     public function changeMembership(

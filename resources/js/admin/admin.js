@@ -2,31 +2,70 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const themeToggle = document.getElementById('themeToggle');
 
-    if (!themeToggle) {
-        return;
+    if (themeToggle) {
+        const savedTheme = localStorage.getItem('admin-theme');
+
+        applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+        updateThemeIcon();
+
+        themeToggle.addEventListener('click', function () {
+            const currentTheme =
+                document.documentElement.getAttribute('data-theme');
+
+            if (currentTheme === 'dark') {
+                applyTheme('light');
+                localStorage.setItem('admin-theme', 'light');
+            } else {
+                applyTheme('dark');
+                localStorage.setItem('admin-theme', 'dark');
+            }
+
+            updateThemeIcon();
+        });
     }
 
-    const savedTheme = localStorage.getItem('admin-theme');
+    const adminWrapper = document.querySelector('.admin-wrapper');
+    const sidebarToggle = document.getElementById('sidebarToggle');
 
-    applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+    if (adminWrapper && sidebarToggle) {
+        const sidebarIsCollapsed =
+            localStorage.getItem('admin-sidebar-collapsed') === 'true';
 
-    updateThemeIcon();
+        setSidebarState(sidebarIsCollapsed);
 
-    themeToggle.addEventListener('click', function () {
+        sidebarToggle.addEventListener('click', function () {
+            const isCollapsed =
+                adminWrapper.classList.toggle('sidebar-collapsed');
 
-        const currentTheme =
-            document.documentElement.getAttribute('data-theme');
+            localStorage.setItem(
+                'admin-sidebar-collapsed',
+                String(isCollapsed)
+            );
 
-        if (currentTheme === 'dark') {
-            applyTheme('light');
-            localStorage.setItem('admin-theme', 'light');
-        } else {
-            applyTheme('dark');
-            localStorage.setItem('admin-theme', 'dark');
+            updateSidebarToggle(isCollapsed);
+        });
+    }
+
+    function setSidebarState(isCollapsed) {
+        adminWrapper.classList.toggle('sidebar-collapsed', isCollapsed);
+        updateSidebarToggle(isCollapsed);
+    }
+
+    function updateSidebarToggle(isCollapsed) {
+        sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
+        sidebarToggle.setAttribute(
+            'aria-label',
+            isCollapsed ? 'Show sidebar' : 'Hide sidebar'
+        );
+
+        const icon = sidebarToggle.querySelector('i');
+
+        if (icon) {
+            icon.className = isCollapsed
+                ? 'bi bi-layout-sidebar'
+                : 'bi bi-layout-sidebar-inset';
         }
-
-        updateThemeIcon();
-    });
+    }
 
     function applyTheme(theme) {
         if (theme === 'dark') {
