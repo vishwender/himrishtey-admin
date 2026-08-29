@@ -63,6 +63,15 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                     Dashboard
                 </a>
 
+                @if(auth('admin')->user()?->hasPermission('view-site-stats'))
+                <a
+                    href="{{ route('admin.site-stats.index') }}"
+                    class="{{ request()->routeIs('admin.site-stats.*') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-line me-2"></i>
+                    Site Stats
+                </a>
+                @endif
+
                 {{-- Masters --}}
                 <div class="nav-group {{ request()->routeIs('admin.educations.*')
                     || request()->routeIs('admin.religions.*')
@@ -447,6 +456,20 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                     Wallet Offers
 
                 </a>
+
+                @if(auth('admin')->user()?->hasPermission('view-site-stats'))
+
+                <a
+                    href="{{ route('admin.site-stats.index') }}"
+                    class="nav-link {{ request()->routeIs('admin.site-stats.*') ? 'active' : '' }}">
+
+                    <i class="bi bi-bar-chart-line me-2"></i>
+
+                    Site Statistics
+
+                </a>
+
+                @endif
 
                 <a href="#">
                     <i class="bi bi-person-badge me-2"></i>

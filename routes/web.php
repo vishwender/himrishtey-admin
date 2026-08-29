@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\Admin\WalletOfferController;
 use App\Http\Controllers\Admin\StaffActivityController;
+use App\Http\Controllers\Admin\SiteStatsController;
 use App\Http\Controllers\SharedProfileController;
 
 Route::get('/shared-profile/{site}/{member}', [SharedProfileController::class, 'show'])->middleware(['signed', 'throttle:60,1'])
@@ -117,6 +118,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             */
 
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+            Route::get('/site-stats', [SiteStatsController::class, 'index'])
+                ->middleware('permission:view-site-stats')
+                ->name('site-stats.index');
 
             /*
             |--------------------------------------------------------------------------
