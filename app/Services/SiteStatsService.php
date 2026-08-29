@@ -15,6 +15,7 @@ class SiteStatsService
     {
         return [
             'core' => $this->coreMemberStats(),
+            'site_hits' => $this->siteHits(),
             'gender' => $this->groupMembers('gender'),
             'demographics' => [
                 'marital_status' => $this->groupMembers('marital_status', 8),
@@ -50,6 +51,17 @@ class SiteStatsService
             'promoted' => $this->countValue($query, 'promoted', 'yes'),
             'hidden' => $this->countValue($query, 'profile_hide', 'yes'),
         ];
+    }
+
+    private function siteHits(): int
+    {
+        if (!$this->columnExists('settings', 'hits')) {
+            return 0;
+        }
+
+        return (int) DB::connection($this->connection)
+            ->table('settings')
+            ->sum('hits');
     }
 
     private function profileQuality(): array

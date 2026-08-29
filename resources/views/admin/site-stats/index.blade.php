@@ -41,8 +41,9 @@
             ['Trusted', $stats['core']['trusted'], 'bi-patch-check'],
             ['Promoted', $stats['core']['promoted'], 'bi-megaphone'],
             ['Hidden', $stats['core']['hidden'], 'bi-eye-slash'],
+            ['Site Hits', $stats['site_hits'], 'bi-cursor'],
         ] as [$label, $value, $icon])
-        <div class="col-sm-6 col-xl-2">
+        <div class="col-sm-6 col-lg-4 col-xl">
             <div class="card stats-kpi h-100"><div class="card-body">
                 <div class="d-flex justify-content-between align-items-start"><div><div class="text-muted small">{{ $label }}</div><h3 class="mb-0 mt-2">{{ number_format($value) }}</h3></div><span class="icon"><i class="bi {{ $icon }}"></i></span></div>
             </div></div>
