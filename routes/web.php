@@ -198,7 +198,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/members/{id}', [
                 MemberController::class,
                 'show',
-            ])->name('members.show');
+            ])
+                ->whereNumber('id')
+                ->name('members.show');
 
 
             /*
@@ -234,6 +236,45 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 '/members/{memberId}/rotation',
                 [MemberController::class, 'storeRotation']
             )->name('members.rotation.store');
+
+            //member delete request
+
+            Route::post(
+                '/members/{member}/delete-request',
+                [DeleteProfileRequestController::class, 'store']
+            )
+                ->middleware('permission:raise-profile-delete-request')
+                ->name('members.delete-request');
+            Route::get(
+                '/members/delete-requests',
+                [DeleteProfileRequestController::class, 'index']
+            )
+                ->middleware('permission:view-profile-delete-requests')
+                ->name('delete-profile-requests.index');
+
+
+            Route::post(
+                '/members/delete-requests/{id}/accept',
+                [DeleteProfileRequestController::class, 'accept']
+            )
+                ->middleware('permission:approve-profile-delete-request')
+                ->name('delete-profile-requests.accept');
+
+
+            Route::post(
+                '/members/delete-requests/{id}/reject',
+                [DeleteProfileRequestController::class, 'reject']
+            )
+                ->middleware('permission:reject-profile-delete-request')
+                ->name('delete-profile-requests.reject');
+
+
+            Route::post(
+                '/members/delete-requests/bulk',
+                [DeleteProfileRequestController::class, 'bulkAction']
+            )
+                ->middleware('permission:bulk-profile-delete-requests')
+                ->name('delete-profile-requests.bulk-action');
 
             // =========================================================
             // Member Rotations

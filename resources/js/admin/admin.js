@@ -1,5 +1,38 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    const deleteRequestModal = document.getElementById('deleteRequestModal');
+
+    if (deleteRequestModal) {
+        deleteRequestModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+
+            if (!button) {
+                return;
+            }
+
+            const form = document.getElementById('deleteRequestForm');
+            const memberName = document.getElementById('deleteRequestMemberName');
+            const profileId = document.getElementById('deleteRequestProfileId');
+
+            if (form) {
+                form.action = button.dataset.action || '';
+            }
+
+            if (memberName) {
+                memberName.textContent = button.dataset.memberName || '';
+            }
+
+            if (profileId) {
+                const value = button.dataset.profileId || '';
+                profileId.textContent = value ? `(${value})` : '';
+            }
+        });
+
+        deleteRequestModal.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('deleteRequestForm')?.reset();
+        });
+    }
+
     const themeToggle = document.getElementById('themeToggle');
 
     if (themeToggle) {

@@ -17,7 +17,7 @@
         font-size: 1.1rem;
     }
 
-    .member-profile-section .card-header h5 > i {
+    .member-profile-section .card-header h5>i {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -3518,6 +3518,23 @@
                 </button>
             </form>
 
+            @if(auth('admin')->user()?->hasPermission('raise-profile-delete-request'))
+
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteRequestModal"
+                data-action="{{ route('admin.members.delete-request', $member->id) }}"
+                data-member-id="{{ $member->id }}"
+                data-profile-id="{{ $member->profile_id }}"
+                data-member-name="{{ $member->full_name }}">
+                <i class="bi bi-trash3 me-1"></i>
+                Raise Delete Request
+            </button>
+
+            @endif
+
         </div>
 
     </div>
@@ -3970,7 +3987,7 @@
 
     @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const copyButton = document.getElementById('copySharedProfileUrl');
             const shareInput = document.getElementById('sharedProfileUrl');
 
@@ -3978,7 +3995,7 @@
                 return;
             }
 
-            copyButton.addEventListener('click', async function () {
+            copyButton.addEventListener('click', async function() {
                 try {
                     await navigator.clipboard.writeText(shareInput.value);
                 } catch (error) {
@@ -3989,7 +4006,7 @@
                 const label = copyButton.querySelector('span');
                 label.textContent = 'Copied';
 
-                setTimeout(function () {
+                setTimeout(function() {
                     label.textContent = 'Copy';
                 }, 1800);
             });

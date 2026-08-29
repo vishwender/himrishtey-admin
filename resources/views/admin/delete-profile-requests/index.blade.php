@@ -1,60 +1,114 @@
 @extends('admin.layout')
 
-@section('title', 'Delete Profile Requests')
+@section('title', 'Profile Delete Requests')
 
 @section('content')
 
 <div class="container-fluid">
 
     {{-- ================================================================
-        HEADER
+         HEADER
     ================================================================= --}}
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 
         <div>
-            <h4 class="fw-bold mb-1">
-                Delete Profile Requests
+            <h4 class="mb-1">
+                Profile Delete Requests
             </h4>
 
-            <p class="text-muted mb-0">
-                Review profile deletion requests submitted by members.
-            </p>
+            <div class="text-muted">
+                Review and process member profile deletion requests.
+            </div>
         </div>
+
+        <a
+            href="{{ route('admin.members.index') }}"
+            class="btn btn-light border">
+            <i class="bi bi-arrow-left me-1"></i>
+            Members
+        </a>
 
     </div>
 
 
     {{-- ================================================================
-        SUMMARY
+         FLASH MESSAGES
+    ================================================================= --}}
+
+    @if(session('success'))
+
+    <div class="alert alert-success alert-dismissible fade show">
+
+        <i class="bi bi-check-circle me-2"></i>
+
+        {{ session('success') }}
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"></button>
+
+    </div>
+
+    @endif
+
+
+    @if(session('error'))
+
+    <div class="alert alert-danger alert-dismissible fade show">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        {{ session('error') }}
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"></button>
+
+    </div>
+
+    @endif
+
+
+    @if($errors->any())
+
+    <div class="alert alert-danger">
+
+        <ul class="mb-0">
+
+            @foreach($errors->all() as $error)
+
+            <li>{{ $error }}</li>
+
+            @endforeach
+
+        </ul>
+
+    </div>
+
+    @endif
+
+
+    {{-- ================================================================
+         SUMMARY
     ================================================================= --}}
 
     <div class="row g-3 mb-4">
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-6 col-md-3">
 
             <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-body d-flex align-items-center gap-3">
+                <div class="card-body">
 
-                    <div
-                        class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary"
-                        style="width:48px;height:48px;">
-
-                        <i class="bi bi-person-x fs-5"></i>
-
+                    <div class="text-muted small">
+                        Total
                     </div>
 
-                    <div>
-
-                        <div class="text-muted small">
-                            Total Requests
-                        </div>
-
-                        <div class="fs-4 fw-bold">
-                            {{ number_format($totalRequests) }}
-                        </div>
-
+                    <div class="fs-4 fw-bold">
+                        {{ number_format($totalCount) }}
                     </div>
 
                 </div>
@@ -64,30 +118,18 @@
         </div>
 
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-6 col-md-3">
 
             <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-body d-flex align-items-center gap-3">
+                <div class="card-body">
 
-                    <div
-                        class="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle text-warning"
-                        style="width:48px;height:48px;">
-
-                        <i class="bi bi-clock-history fs-5"></i>
-
+                    <div class="text-muted small">
+                        Pending
                     </div>
 
-                    <div>
-
-                        <div class="text-muted small">
-                            Pending
-                        </div>
-
-                        <div class="fs-4 fw-bold">
-                            {{ number_format($pendingRequests) }}
-                        </div>
-
+                    <div class="fs-4 fw-bold text-warning">
+                        {{ number_format($pendingCount) }}
                     </div>
 
                 </div>
@@ -97,30 +139,39 @@
         </div>
 
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-6 col-md-3">
 
             <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-body d-flex align-items-center gap-3">
+                <div class="card-body">
 
-                    <div
-                        class="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success"
-                        style="width:48px;height:48px;">
-
-                        <i class="bi bi-check-circle fs-5"></i>
-
+                    <div class="text-muted small">
+                        Accepted
                     </div>
 
-                    <div>
+                    <div class="fs-4 fw-bold text-success">
+                        {{ number_format($acceptedCount) }}
+                    </div>
 
-                        <div class="text-muted small">
-                            Processed
-                        </div>
+                </div>
 
-                        <div class="fs-4 fw-bold">
-                            {{ number_format($processedRequests) }}
-                        </div>
+            </div>
 
+        </div>
+
+
+        <div class="col-6 col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Rejected
+                    </div>
+
+                    <div class="fs-4 fw-bold text-danger">
+                        {{ number_format($rejectedCount) }}
                     </div>
 
                 </div>
@@ -133,7 +184,7 @@
 
 
     {{-- ================================================================
-        FILTERS
+         FILTERS
     ================================================================= --}}
 
     <div class="card border-0 shadow-sm mb-4">
@@ -146,53 +197,53 @@
 
                 <div class="row g-3 align-items-end">
 
-                    {{-- Search --}}
+                    <div class="col-md-5">
 
-                    <div class="col-lg-6 col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Search Member
+                        <label class="form-label">
+                            Search
                         </label>
 
                         <input
                             type="text"
                             name="search"
                             class="form-control"
-                            value="{{ request('search') }}"
-                            placeholder="Profile ID, name, email or mobile">
+                            value="{{ $search }}"
+                            placeholder="Profile ID, name or mobile...">
 
                     </div>
 
 
-                    {{-- Status --}}
+                    <div class="col-md-3">
 
-                    <div class="col-lg-3 col-md-3">
-
-                        <label class="form-label fw-semibold">
+                        <label class="form-label">
                             Status
                         </label>
 
-                        <select name="status" class="form-select">
+                        <select
+                            name="status"
+                            class="form-select">
 
-                            <option value="">
-                                All Statuses
+                            <option
+                                value="all"
+                                {{ $status === 'all' ? 'selected' : '' }}>
+                                All
                             </option>
 
                             <option
-                                value="0"
-                                {{ request('status') === '0' ? 'selected' : '' }}>
+                                value="pending"
+                                {{ $status === 'pending' ? 'selected' : '' }}>
                                 Pending
                             </option>
 
                             <option
-                                value="1"
-                                {{ request('status') === '1' ? 'selected' : '' }}>
+                                value="accepted"
+                                {{ $status === 'accepted' ? 'selected' : '' }}>
                                 Accepted
                             </option>
 
                             <option
-                                value="2"
-                                {{ request('status') === '2' ? 'selected' : '' }}>
+                                value="rejected"
+                                {{ $status === 'rejected' ? 'selected' : '' }}>
                                 Rejected
                             </option>
 
@@ -201,30 +252,39 @@
                     </div>
 
 
-                    {{-- Buttons --}}
+                    <div class="col-md-2">
 
-                    <div class="col-lg-3 col-md-3">
+                        <label class="form-label">
+                            Per Page
+                        </label>
 
-                        <div class="d-flex gap-2">
+                        <select
+                            name="per_page"
+                            class="form-select">
 
-                            <button
-                                type="submit"
-                                class="btn btn-primary flex-grow-1">
+                            @foreach([10, 25, 50, 100] as $size)
 
-                                <i class="bi bi-search me-1"></i>
-                                Filter
+                            <option
+                                value="{{ $size }}"
+                                {{ (int) $perPage === $size ? 'selected' : '' }}>
+                                {{ $size }}
+                            </option>
 
-                            </button>
+                            @endforeach
 
-                            <a
-                                href="{{ route('admin.delete-profile-requests.index') }}"
-                                class="btn btn-outline-secondary">
+                        </select>
 
-                                <i class="bi bi-x-lg"></i>
+                    </div>
 
-                            </a>
 
-                        </div>
+                    <div class="col-md-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>
+                            Search
+                        </button>
 
                     </div>
 
@@ -238,374 +298,648 @@
 
 
     {{-- ================================================================
-        REQUESTS TABLE
+         BULK FORM
     ================================================================= --}}
 
-    <div class="card border-0 shadow-sm">
+    <form
+        method="POST"
+        action="{{ route('admin.delete-profile-requests.bulk-action') }}"
+        id="bulkDeleteRequestForm">
 
-        <div class="card-header bg-white border-bottom py-3">
+        @csrf
 
-            <div class="d-flex justify-content-between align-items-center">
 
-                <h6 class="fw-bold mb-0">
-                    Profile Deletion Requests
-                </h6>
+        {{-- ============================================================
+             BULK TOOLBAR
+        ============================================================= --}}
 
-                <span class="text-muted small">
-                    {{ $requests->total() }} request(s)
-                </span>
+        <div
+            id="bulkToolbar"
+            class="card border-0 shadow-sm mb-3 d-none">
+
+            <div class="card-body py-3">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                    <div>
+
+                        <strong id="selectedRequestCount">
+                            0
+                        </strong>
+
+                        request(s) selected
+
+                    </div>
+
+
+                    <div class="d-flex gap-2">
+
+                        @if(auth('admin')->user()?->hasPermission('bulk-profile-delete-requests'))
+
+                        <button
+                            type="button"
+                            class="btn btn-success"
+                            onclick="submitBulkDeleteAction('accept')">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Accept Selected
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            onclick="submitBulkDeleteAction('reject')">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Reject Selected
+                        </button>
+
+                        @endif
+
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
 
-        <div class="table-responsive">
-
-            <table class="table align-middle mb-0">
-
-                <thead class="table-light">
-
-                    <tr>
-
-                        <th style="width:70px;">
-                            #
-                        </th>
-
-                        <th>
-                            Member
-                        </th>
-
-                        <th>
-                            Profile ID
-                        </th>
-
-                        <th>
-                            Reason
-                        </th>
-
-                        <th>
-                            Requested On
-                        </th>
-
-                        <th>
-                            Requests
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th class="text-end">
-                            Action
-                        </th>
-
-                    </tr>
-
-                </thead>
+        <input
+            type="hidden"
+            name="action"
+            id="bulkAction"
+            value="">
 
 
-                <tbody>
+        {{-- ============================================================
+             TABLE
+        ============================================================= --}}
 
-                    @forelse($requests as $requestItem)
+        <div class="card border-0 shadow-sm">
 
-                    @php
-                    $member = $requestItem->member;
-                    @endphp
+            <div class="table-responsive">
 
-                    <tr>
+                <table class="table table-hover align-middle mb-0">
 
-                        {{-- ID --}}
+                    <thead class="table-light">
 
-                        <td class="text-muted">
-                            {{ $requestItem->id }}
-                        </td>
+                        <tr>
 
+                            <th style="width: 45px;">
 
-                        {{-- Member --}}
+                                @if($status === 'pending' || $status === 'all')
 
-                        <td>
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="selectAllDeleteRequests">
 
-                            @if($member)
-
-                            <div class="fw-semibold">
-                                {{ $member->full_name }}
-                            </div>
-
-                            <div class="small text-muted">
-
-                                @if(!empty($member->mobile_number))
-                                {{ $member->mobile_number }}
                                 @endif
 
-                                @if(!empty($member->email))
-                                <span class="mx-1">•</span>
-                                {{ $member->email }}
+                            </th>
+
+                            <th>Member</th>
+
+                            <th>Requested By</th>
+
+                            <th>Reason</th>
+
+                            <th>Requests</th>
+
+                            <th>Date</th>
+
+                            <th>Status</th>
+
+                            <th class="text-end">
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @forelse($requests as $deleteRequest)
+
+                        @php
+
+                        $member = $deleteRequest->member;
+
+                        $requestedBy =
+                        $admins[$deleteRequest->request_by] ?? null;
+
+                        @endphp
+
+
+                        <tr>
+
+                            {{-- Checkbox --}}
+
+                            <td>
+
+                                @if((int) $deleteRequest->status === 0)
+
+                                <input
+                                    type="checkbox"
+                                    name="request_ids[]"
+                                    value="{{ $deleteRequest->id }}"
+                                    class="form-check-input delete-request-checkbox">
+
                                 @endif
 
-                            </div>
-
-                            @else
-
-                            <span class="text-danger">
-                                Member not found
-                            </span>
-
-                            <div class="small text-muted">
-                                User ID: {{ $requestItem->user_id }}
-                            </div>
-
-                            @endif
-
-                        </td>
+                            </td>
 
 
-                        {{-- Profile ID --}}
+                            {{-- Member --}}
 
-                        <td>
+                            <td>
 
-                            @if($member)
+                                @if($member)
 
-                            <span class="badge bg-light text-dark border">
-                                {{ $member->profile_id }}
-                            </span>
+                                <div class="fw-semibold">
+                                    {{ $member->full_name }}
+                                </div>
 
-                            @else
+                                <div class="small text-muted">
+                                    {{ $member->profile_id }}
+                                </div>
 
-                            —
+                                @else
 
-                            @endif
+                                <span class="text-muted">
+                                    Member unavailable
+                                </span>
 
-                        </td>
+                                @endif
+
+                            </td>
 
 
-                        {{-- Reason --}}
+                            {{-- Requested by --}}
 
-                        <td style="max-width:350px;">
+                            <td>
 
-                            @if(!empty($requestItem->reason))
+                                @if($requestedBy)
 
-                            <div
-                                class="text-wrap"
-                                title="{{ $requestItem->reason }}">
+                                <div class="fw-semibold">
+                                    {{ $requestedBy->name }}
+                                </div>
 
-                                {{ \Illuminate\Support\Str::limit(
-                                            $requestItem->reason,
+                                <div class="small text-muted">
+                                    {{ $requestedBy->profile_id }}
+                                </div>
+
+                                @else
+
+                                <span class="text-muted">
+                                    Admin #{{ $deleteRequest->request_by }}
+                                </span>
+
+                                @endif
+
+                            </td>
+
+
+                            {{-- Reason --}}
+
+                            <td style="max-width: 300px;">
+
+                                <div
+                                    class="text-wrap"
+                                    title="{{ $deleteRequest->reason }}">
+                                    {{ \Illuminate\Support\Str::limit(
+                                            $deleteRequest->reason,
                                             100
                                         ) }}
+                                </div>
 
-                            </div>
-
-                            @else
-
-                            <span class="text-muted">
-                                No reason provided
-                            </span>
-
-                            @endif
-
-                        </td>
+                            </td>
 
 
-                        {{-- Date --}}
+                            {{-- Count --}}
 
-                        <td>
+                            <td>
 
-                            @if(!empty($requestItem->date))
+                                <span class="badge bg-light text-dark border">
+                                    {{ $deleteRequest->request_count ?? 1 }}
+                                </span>
 
-                            {{ $requestItem->date }}
-
-                            @else
-
-                            —
-
-                            @endif
-
-                        </td>
-
-                        <td>
-
-                            @if($requestItem->request_count > 1)
-
-                            <span class="badge bg-danger-subtle text-danger-emphasis">
-
-                                <i class="bi bi-exclamation-circle me-1"></i>
-
-                                {{ $requestItem->request_count }} Requests
-
-                            </span>
-
-                            @else
-
-                            <span class="badge bg-light text-dark border">
-
-                                1 Request
-
-                            </span>
-
-                            @endif
-
-                        </td>
+                            </td>
 
 
-                        {{-- Status --}}
+                            {{-- Date --}}
 
-                        <td>
+                            <td>
 
-                            @if((int) $requestItem->status === 0)
+                                {{ $deleteRequest->date ?: '-' }}
 
-                            <span class="badge bg-warning-subtle text-warning-emphasis">
-
-                                <i class="bi bi-clock me-1"></i>
-                                Pending
-
-                            </span>
-
-                            @elseif((int) $requestItem->status === 1)
-
-                            <span class="badge bg-success-subtle text-success-emphasis">
-
-                                <i class="bi bi-check-circle me-1"></i>
-                                Accepted
-
-                            </span>
-
-                            @elseif((int) $requestItem->status === 2)
-
-                            <span class="badge bg-danger-subtle text-danger-emphasis">
-
-                                <i class="bi bi-x-circle me-1"></i>
-                                Rejected
-
-                            </span>
-
-                            @endif
-
-                        </td>
+                            </td>
 
 
-                        {{-- Actions --}}
+                            {{-- Status --}}
 
-                        <td class="text-end">
+                            <td>
 
-                            @if((int) $requestItem->status === 0)
+                                @if((int) $deleteRequest->status === 0)
 
-                            <div class="d-flex justify-content-end gap-2">
+                                <span class="badge bg-warning text-dark">
+                                    Pending
+                                </span>
 
-                                {{-- Accept --}}
-                                <form
-                                    method="POST"
-                                    action="{{ route(
-                    'admin.delete-profile-requests.accept',
-                    $requestItem->id
-                ) }}"
-                                    onsubmit="return confirm(
-                    'Are you sure you want to accept this profile deletion request?'
-                );">
+                                @elseif((int) $deleteRequest->status === 1)
 
-                                    @csrf
+                                <span class="badge bg-success">
+                                    Accepted
+                                </span>
+
+                                @else
+
+                                <span class="badge bg-danger">
+                                    Rejected
+                                </span>
+
+                                @endif
+
+                            </td>
+
+
+                            {{-- Action --}}
+
+                            <td class="text-end">
+
+                                @if((int) $deleteRequest->status === 0)
+
+                                <div class="d-flex justify-content-end gap-2">
+
+                                    @if(auth('admin')->user()?->hasPermission('approve-profile-delete-request'))
 
                                     <button
-                                        type="submit"
-                                        class="btn btn-sm btn-success">
-
-                                        <i class="bi bi-check-lg me-1"></i>
-                                        Accept
-
+                                        type="button"
+                                        class="btn btn-sm btn-outline-success"
+                                        onclick="submitSingleRequest(
+                                                        'acceptForm{{ $deleteRequest->id }}',
+                                                        'Accept this profile delete request?'
+                                                    )">
+                                        <i class="bi bi-check-lg"></i>
                                     </button>
 
-                                </form>
+                                    @endif
 
 
-                                {{-- Reject --}}
-                                <form
-                                    method="POST"
-                                    action="{{ route(
-                    'admin.delete-profile-requests.reject',
-                    $requestItem->id
-                ) }}"
-                                    onsubmit="return confirm(
-                    'Are you sure you want to reject this profile deletion request?'
-                );">
-
-                                    @csrf
+                                    @if(auth('admin')->user()?->hasPermission('reject-profile-delete-request'))
 
                                     <button
-                                        type="submit"
-                                        class="btn btn-sm btn-outline-danger">
-
-                                        <i class="bi bi-x-lg me-1"></i>
-                                        Reject
-
+                                        type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="submitSingleRequest(
+                                                        'rejectForm{{ $deleteRequest->id }}',
+                                                        'Reject this profile delete request?'
+                                                    )">
+                                        <i class="bi bi-x-lg"></i>
                                     </button>
 
-                                </form>
+                                    @endif
 
-                            </div>
+                                </div>
 
-                            @elseif((int) $requestItem->status === 1)
+                                @else
 
-                            <span class="text-success fw-semibold">
-                                <i class="bi bi-check-circle me-1"></i>
-                                Accepted
-                            </span>
+                                <span class="text-muted small">
+                                    Processed
+                                </span>
 
-                            @elseif((int) $requestItem->status === 2)
+                                @endif
 
-                            <span class="text-danger fw-semibold">
-                                <i class="bi bi-x-circle me-1"></i>
-                                Rejected
-                            </span>
+                            </td>
 
-                            @endif
+                        </tr>
 
-                        </td>
+                        @empty
 
-                    </tr>
+                        <tr>
 
-                    @empty
-
-                    <tr>
-
-                        <td
-                            colspan="7"
-                            class="text-center py-5">
-
-                            <div class="text-muted">
+                            <td
+                                colspan="8"
+                                class="text-center py-5 text-muted">
 
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
 
-                                No profile deletion requests found.
+                                No profile delete requests found.
 
-                            </div>
+                            </td>
 
-                        </td>
+                        </tr>
 
-                    </tr>
+                        @endforelse
 
-                    @endforelse
+                    </tbody>
 
-                </tbody>
+                </table>
 
-            </table>
+            </div>
+
+
+            @if($requests->hasPages())
+
+            <div class="card-footer bg-white">
+
+                {{ $requests->links() }}
+
+            </div>
+
+            @endif
 
         </div>
 
+    </form>
 
-        {{-- Pagination --}}
 
-        @if($requests->hasPages())
+    {{-- ================================================================
+         INDIVIDUAL FORMS
+    ================================================================= --}}
 
-        <div class="card-footer bg-white">
+    @foreach($requests as $deleteRequest)
 
-            {{ $requests->links() }}
+    @if((int) $deleteRequest->status === 0)
 
-        </div>
+    <form
+        method="POST"
+        action="{{ route(
+                    'admin.delete-profile-requests.accept',
+                    $deleteRequest->id
+                ) }}"
+        id="acceptForm{{ $deleteRequest->id }}"
+        class="d-none">
+        @csrf
+    </form>
 
-        @endif
 
-    </div>
+    <form
+        method="POST"
+        action="{{ route(
+                    'admin.delete-profile-requests.reject',
+                    $deleteRequest->id
+                ) }}"
+        id="rejectForm{{ $deleteRequest->id }}"
+        class="d-none">
+        @csrf
+    </form>
+
+    @endif
+
+    @endforeach
 
 </div>
 
 @endsection
+
+
+@push('scripts')
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const selectAll =
+            document.getElementById(
+                'selectAllDeleteRequests'
+            );
+
+        const checkboxes =
+            document.querySelectorAll(
+                '.delete-request-checkbox'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Select All
+        |--------------------------------------------------------------------------
+        */
+
+        if (selectAll) {
+
+            selectAll.addEventListener(
+                'change',
+                function() {
+
+                    checkboxes.forEach(function(checkbox) {
+
+                        checkbox.checked =
+                            selectAll.checked;
+
+                    });
+
+
+                    updateBulkToolbar();
+
+                }
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Individual checkbox
+        |--------------------------------------------------------------------------
+        */
+
+        checkboxes.forEach(function(checkbox) {
+
+            checkbox.addEventListener(
+                'change',
+                function() {
+
+                    updateSelectAllState();
+
+                    updateBulkToolbar();
+
+                }
+            );
+
+        });
+
+
+        updateBulkToolbar();
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Select All
+    |--------------------------------------------------------------------------
+    */
+
+    function updateSelectAllState() {
+        const selectAll =
+            document.getElementById(
+                'selectAllDeleteRequests'
+            );
+
+        if (!selectAll) {
+            return;
+        }
+
+
+        const checkboxes =
+            Array.from(
+                document.querySelectorAll(
+                    '.delete-request-checkbox'
+                )
+            );
+
+
+        const checked =
+            checkboxes.filter(function(checkbox) {
+
+                return checkbox.checked;
+
+            });
+
+
+        selectAll.checked =
+            checkboxes.length > 0 &&
+            checked.length === checkboxes.length;
+
+
+        selectAll.indeterminate =
+            checked.length > 0 &&
+            checked.length < checkboxes.length;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bulk Toolbar
+    |--------------------------------------------------------------------------
+    */
+
+    function updateBulkToolbar() {
+        const selected =
+            document.querySelectorAll(
+                '.delete-request-checkbox:checked'
+            );
+
+
+        const toolbar =
+            document.getElementById(
+                'bulkToolbar'
+            );
+
+
+        const counter =
+            document.getElementById(
+                'selectedRequestCount'
+            );
+
+
+        if (!toolbar || !counter) {
+            return;
+        }
+
+
+        counter.textContent =
+            selected.length;
+
+
+        if (selected.length > 0) {
+
+            toolbar.classList.remove('d-none');
+
+        } else {
+
+            toolbar.classList.add('d-none');
+
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bulk Action
+    |--------------------------------------------------------------------------
+    */
+
+    function submitBulkDeleteAction(action) {
+        const selected =
+            document.querySelectorAll(
+                '.delete-request-checkbox:checked'
+            );
+
+
+        if (selected.length === 0) {
+
+            alert(
+                'Please select at least one delete request.'
+            );
+
+            return;
+        }
+
+
+        let message;
+
+
+        if (action === 'accept') {
+
+            message =
+                'Are you sure you want to ACCEPT ' +
+                selected.length +
+                ' profile delete request(s)?';
+
+        } else {
+
+            message =
+                'Are you sure you want to REJECT ' +
+                selected.length +
+                ' profile delete request(s)?';
+
+        }
+
+
+        if (!confirm(message)) {
+            return;
+        }
+
+
+        document.getElementById(
+            'bulkAction'
+        ).value = action;
+
+
+        document.getElementById(
+            'bulkDeleteRequestForm'
+        ).submit();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Single Action
+    |--------------------------------------------------------------------------
+    */
+
+    function submitSingleRequest(
+        formId,
+        message
+    ) {
+
+        if (!confirm(message)) {
+            return;
+        }
+
+
+        const form =
+            document.getElementById(formId);
+
+
+        if (form) {
+            form.submit();
+        }
+    }
+</script>
+
+@endpush

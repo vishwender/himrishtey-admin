@@ -300,6 +300,18 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                         </a>
 
+                        @if(auth('admin')->user()?->hasPermission('view-profile-delete-requests'))
+
+                        <a
+                            href="{{ route('admin.delete-profile-requests.index') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.delete-profile-requests.*') ? 'active' : '' }}">
+                            <i class="bi bi-trash3 me-2"></i>
+
+                            Delete Requests
+                        </a>
+
+                        @endif
+
                     </div>
 
                 </div>
@@ -623,6 +635,7 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
     </div>
 
+    @include('admin.members.partials.delete-request-modal')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

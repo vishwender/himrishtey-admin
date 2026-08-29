@@ -850,6 +850,23 @@
                                             </a>
                                         </li>
 
+                                        @if(auth('admin')->user()?->hasPermission('raise-profile-delete-request'))
+
+                                        <button
+                                            type="button"
+                                            class="dropdown-item text-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteRequestModal"
+                                            data-action="{{ route('admin.members.delete-request', $member->id) }}"
+                                            data-member-id="{{ $member->id }}"
+                                            data-profile-id="{{ $member->profile_id }}"
+                                            data-member-name="{{ $member->full_name }}">
+                                            <i class="bi bi-trash3 me-2"></i>
+                                            Raise Delete Request
+                                        </button>
+
+                                        @endif
+
 
                                         {{-- Activity --}}
                                         <li>

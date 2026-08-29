@@ -3,23 +3,34 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\DeleteProfileRequest;
+use App\Services\AdminActivityLogger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class DeleteProfileRequestController extends Controller
 {
+    /**
+     * Delete request listing.
+     */
     public function index(Request $request)
     {
-        $admin = Auth::guard('admin')->user();
+        $search = trim((string) $request->input('search'));
 
-        if (!$admin) {
-            return redirect()->route('admin.login');
+        $status = $request->input('status', 'pending');
+
+        $perPage = (int) $request->input('per_page', 25);
+
+        if (!in_array($perPage, [10, 25, 50, 100], true)) {
+            $perPage = 25;
         }
+
 
         /*
         |--------------------------------------------------------------------------
-        | Query
+        | Latest request for each member
         |--------------------------------------------------------------------------
         */
 
@@ -31,9 +42,16 @@ class DeleteProfileRequestController extends Controller
                     ->selectRaw('MAX(id)')
                     ->from('delete_profile_request')
                     ->groupBy('user_id');
-            });
+            })
+            ->select('delete_profile_request.*')
 
-        $query->select('delete_profile_request.*')
+
+            /*
+            |--------------------------------------------------------------------------
+            | Number of requests raised for this member
+            |--------------------------------------------------------------------------
+            */
+
             ->selectSub(function ($subQuery) {
 
                 $subQuery
@@ -50,58 +68,50 @@ class DeleteProfileRequestController extends Controller
         |--------------------------------------------------------------------------
         | Search
         |--------------------------------------------------------------------------
-        |
-        | Search by:
-        | - Profile ID
-        | - Name
-        | - Email
-        | - Mobile
-        |
         */
 
-        if ($request->filled('search')) {
+        if ($search !== '') {
 
-            $search = trim($request->search);
+            $query->whereHas('member', function ($memberQuery) use ($search) {
 
-            $query->whereHas('member', function ($q) use ($search) {
+                $memberQuery->where(function ($q) use ($search) {
 
-                $q->where('profile_id', 'like', "%{$search}%")
-                    ->orWhere('full_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('mobile_number', 'like', "%{$search}%");
+                    $q->where(
+                        'full_name',
+                        'like',
+                        "%{$search}%"
+                    )
+                        ->orWhere(
+                            'profile_id',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'mobile_number',
+                            'like',
+                            "%{$search}%"
+                        );
+                });
             });
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | Status Filter
+        | Status filter
         |--------------------------------------------------------------------------
-        |
-        | 0 = Pending
-        | 1 = Processed
-        |
-        | We can change these meanings later if your old system uses
-        | different status values.
-        |
         */
 
-        if ($request->filled('status')) {
+        if ($status === 'pending') {
 
-            $query->where(
-                'status',
-                (int) $request->status
-            );
+            $query->where('status', 0);
+        } elseif ($status === 'accepted') {
+
+            $query->where('status', 1);
+        } elseif ($status === 'rejected') {
+
+            $query->where('status', 2);
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sorting
-        |--------------------------------------------------------------------------
-        */
-
-        $query->orderByDesc('id');
 
 
         /*
@@ -111,86 +121,401 @@ class DeleteProfileRequestController extends Controller
         */
 
         $requests = $query
-            ->paginate(20)
+            ->orderByDesc('id')
+            ->paginate($perPage)
             ->withQueryString();
 
 
         /*
         |--------------------------------------------------------------------------
-        | Counts
+        | Load central admins separately
+        |--------------------------------------------------------------------------
+        |
+        | request_by contains the central admin ID.
+        | Don't create a cross-database relationship.
         |--------------------------------------------------------------------------
         */
 
-        $totalRequests = DeleteProfileRequest::query()
-            ->distinct()
-            ->count('user_id');
+        $adminIds = $requests
+            ->getCollection()
+            ->pluck('request_by')
+            ->filter()
+            ->unique()
+            ->values();
 
-        $pendingRequests =
-            DeleteProfileRequest::where('status', 0)->count();
 
-        $processedRequests =
-            DeleteProfileRequest::where('status', 1)->count();
+        $admins = Admin::query()
+            ->whereIn('id', $adminIds)
+            ->get()
+            ->keyBy('id');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Summary
+        |--------------------------------------------------------------------------
+        |
+        | Count latest request per member.
+        |--------------------------------------------------------------------------
+        */
+
+        $latestIds = DB::connection('site')
+            ->table('delete_profile_request')
+            ->selectRaw('MAX(id) as id')
+            ->groupBy('user_id');
+
+
+        $summaryQuery = DB::connection('site')
+            ->table('delete_profile_request')
+            ->whereIn('id', $latestIds);
+
+
+        $totalCount = (clone $summaryQuery)->count();
+
+        $pendingCount = (clone $summaryQuery)
+            ->where('status', 0)
+            ->count();
+
+        $acceptedCount = (clone $summaryQuery)
+            ->where('status', 1)
+            ->count();
+
+        $rejectedCount = (clone $summaryQuery)
+            ->where('status', 2)
+            ->count();
 
 
         return view(
             'admin.delete-profile-requests.index',
             compact(
                 'requests',
-                'totalRequests',
-                'pendingRequests',
-                'processedRequests'
+                'admins',
+                'search',
+                'status',
+                'perPage',
+                'totalCount',
+                'pendingCount',
+                'acceptedCount',
+                'rejectedCount'
             )
         );
     }
 
-    public function accept($id)
-    {
-        $admin = Auth::guard('admin')->user();
 
-        if (!$admin) {
-            return redirect()->route('admin.login');
-        }
+    /**
+     * Accept a single request.
+     */
+    public function accept(
+        int $id,
+        AdminActivityLogger $activityLogger
+    ) {
 
-        $deleteRequest = DeleteProfileRequest::findOrFail($id);
+        $deleteRequest = DeleteProfileRequest::query()
+            ->with('member')
+            ->findOrFail($id);
 
-        // Only pending requests can be accepted.
+
         if ((int) $deleteRequest->status !== 0) {
-            return redirect()
-                ->route('admin.delete-profile-requests.index')
-                ->with('error', 'This request has already been processed.');
+
+            return back()->with(
+                'error',
+                'This delete request has already been processed.'
+            );
         }
+
+
+        $member = $deleteRequest->member;
+
 
         $deleteRequest->status = 1;
         $deleteRequest->save();
 
-        return redirect()
-            ->route('admin.delete-profile-requests.index')
-            ->with('success', 'Profile deletion request accepted.');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLogger->log(
+            action: 'profile_delete_approved',
+            description: $member
+                ? "Approved delete request for {$member->profile_id}."
+                : "Approved profile delete request #{$deleteRequest->id}.",
+            module: 'members',
+            memberId: (int) $deleteRequest->user_id,
+            subjectType: 'delete_profile_request',
+            subjectId: (int) $deleteRequest->id,
+            metadata: [
+                'profile_id' => $member?->profile_id,
+                'full_name' => $member?->full_name,
+                'reason' => $deleteRequest->reason,
+            ]
+        );
+
+
+        return back()->with(
+            'success',
+            'Profile delete request accepted successfully.'
+        );
     }
 
 
-    public function reject($id)
-    {
-        $admin = Auth::guard('admin')->user();
+    /**
+     * Reject a single request.
+     */
+    public function reject(
+        int $id,
+        AdminActivityLogger $activityLogger
+    ) {
 
-        if (!$admin) {
-            return redirect()->route('admin.login');
-        }
+        $deleteRequest = DeleteProfileRequest::query()
+            ->with('member')
+            ->findOrFail($id);
 
-        $deleteRequest = DeleteProfileRequest::findOrFail($id);
 
-        // Only pending requests can be rejected.
         if ((int) $deleteRequest->status !== 0) {
-            return redirect()
-                ->route('admin.delete-profile-requests.index')
-                ->with('error', 'This request has already been processed.');
+
+            return back()->with(
+                'error',
+                'This delete request has already been processed.'
+            );
         }
+
+
+        $member = $deleteRequest->member;
+
 
         $deleteRequest->status = 2;
         $deleteRequest->save();
 
-        return redirect()
-            ->route('admin.delete-profile-requests.index')
-            ->with('success', 'Profile deletion request rejected.');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit
+        |--------------------------------------------------------------------------
+        */
+
+        $activityLogger->log(
+            action: 'profile_delete_rejected',
+            description: $member
+                ? "Rejected delete request for {$member->profile_id}."
+                : "Rejected profile delete request #{$deleteRequest->id}.",
+            module: 'members',
+            memberId: (int) $deleteRequest->user_id,
+            subjectType: 'delete_profile_request',
+            subjectId: (int) $deleteRequest->id,
+            metadata: [
+                'profile_id' => $member?->profile_id,
+                'full_name' => $member?->full_name,
+                'reason' => $deleteRequest->reason,
+            ]
+        );
+
+
+        return back()->with(
+            'success',
+            'Profile delete request rejected successfully.'
+        );
+    }
+
+
+    /**
+     * Bulk Accept / Reject.
+     */
+    public function bulkAction(
+        Request $request,
+        AdminActivityLogger $activityLogger
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
+        $validated = $request->validate([
+            'request_ids' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'request_ids.*' => [
+                'required',
+                'integer',
+            ],
+
+            'action' => [
+                'required',
+                Rule::in([
+                    'accept',
+                    'reject',
+                ]),
+            ],
+        ]);
+
+
+        $requestIds = array_values(
+            array_unique(
+                array_map(
+                    'intval',
+                    $validated['request_ids']
+                )
+            )
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get ONLY pending requests
+        |--------------------------------------------------------------------------
+        |
+        | This is important.
+        |
+        | Even if someone manually modifies the HTML and submits an accepted
+        | request ID, it will not be processed again.
+        |--------------------------------------------------------------------------
+        */
+
+        $deleteRequests = DeleteProfileRequest::query()
+            ->with('member')
+            ->whereIn('id', $requestIds)
+            ->where('status', 0)
+            ->get();
+
+
+        if ($deleteRequests->isEmpty()) {
+
+            return back()->with(
+                'error',
+                'No pending delete requests were selected.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Determine new status
+        |--------------------------------------------------------------------------
+        */
+
+        $newStatus = $validated['action'] === 'accept'
+            ? 1
+            : 2;
+
+
+        $processedCount = 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Site DB transaction
+        |--------------------------------------------------------------------------
+        */
+
+        DB::connection('site')->transaction(
+            function () use (
+                $deleteRequests,
+                $newStatus,
+                &$processedCount
+            ) {
+
+                foreach ($deleteRequests as $deleteRequest) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Re-check status inside transaction
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $updated = DB::connection('site')
+                        ->table('delete_profile_request')
+                        ->where('id', $deleteRequest->id)
+                        ->where('status', 0)
+                        ->update([
+                            'status' => $newStatus,
+                        ]);
+
+
+                    if ($updated === 1) {
+
+                        $processedCount++;
+                    }
+                }
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit each member
+        |--------------------------------------------------------------------------
+        |
+        | Audit DB is central, so intentionally keep it outside the site DB
+        | transaction.
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($deleteRequests as $deleteRequest) {
+
+            $member = $deleteRequest->member;
+
+
+            if ($validated['action'] === 'accept') {
+
+                $activityLogger->log(
+                    action: 'profile_delete_approved',
+                    description: $member
+                        ? "Bulk approved delete request for {$member->profile_id}."
+                        : "Bulk approved profile delete request #{$deleteRequest->id}.",
+                    module: 'members',
+                    memberId: (int) $deleteRequest->user_id,
+                    subjectType: 'delete_profile_request',
+                    subjectId: (int) $deleteRequest->id,
+                    metadata: [
+                        'profile_id' => $member?->profile_id,
+                        'full_name' => $member?->full_name,
+                        'reason' => $deleteRequest->reason,
+                        'bulk_action' => true,
+                    ]
+                );
+            } else {
+
+                $activityLogger->log(
+                    action: 'profile_delete_rejected',
+                    description: $member
+                        ? "Bulk rejected delete request for {$member->profile_id}."
+                        : "Bulk rejected profile delete request #{$deleteRequest->id}.",
+                    module: 'members',
+                    memberId: (int) $deleteRequest->user_id,
+                    subjectType: 'delete_profile_request',
+                    subjectId: (int) $deleteRequest->id,
+                    metadata: [
+                        'profile_id' => $member?->profile_id,
+                        'full_name' => $member?->full_name,
+                        'reason' => $deleteRequest->reason,
+                        'bulk_action' => true,
+                    ]
+                );
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
+
+        $actionText = $validated['action'] === 'accept'
+            ? 'accepted'
+            : 'rejected';
+
+
+        return back()->with(
+            'success',
+            "{$processedCount} profile delete request(s) {$actionText} successfully."
+        );
     }
 }
