@@ -41,6 +41,12 @@ class MemberRotationController extends Controller
 
         $query = MemberRotation::query()
             ->with('member')
+            ->orderByRaw("CASE
+                WHEN DATE(next_rotation_at) = CURDATE() THEN 1
+                WHEN DATE(next_rotation_at) = DATE_ADD(CURDATE(), INTERVAL 1 DAY) THEN 2
+                WHEN DATE(next_rotation_at) > DATE_ADD(CURDATE(), INTERVAL 1 DAY) THEN 3
+                ELSE 4
+            END")
             ->orderBy('next_rotation_at', 'asc');
 
 

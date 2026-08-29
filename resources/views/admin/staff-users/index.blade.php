@@ -114,7 +114,7 @@
 
                     <div class="input-group">
 
-                        <span class="input-group-text bg-white">
+                        <span class="input-group-text">
                             <i class="bi bi-search"></i>
                         </span>
 
