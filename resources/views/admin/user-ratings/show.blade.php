@@ -3,7 +3,7 @@
 @section('title', 'Rating Details')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('admin/css/user-ratings.css') }}">
+@vite('resources/css/admin/user-rating/user-rating.css')
 @endpush
 
 @section('content')
@@ -61,8 +61,10 @@
                                 Rating
                             </label>
 
-                            <div class="fs-4 fw-bold">
-                                {{ $rating->rating }}
+                            <div class="rating-stars-large">
+                                @include('admin.user-ratings.partials.stars', [
+                                    'value' => $rating->rating,
+                                ])
                             </div>
 
                         </div>

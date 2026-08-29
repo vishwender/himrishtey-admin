@@ -2,6 +2,10 @@
 
 @section('title', 'User Ratings')
 
+@push('styles')
+@vite('resources/css/admin/user-rating/user-rating.css')
+@endpush
+
 @section('content')
 
 <div class="container-fluid">
@@ -140,9 +144,9 @@
                             </td>
 
                             <td>
-                                <span class="rating-value">
-                                    {{ $rating->rating }}
-                                </span>
+                                @include('admin.user-ratings.partials.stars', [
+                                    'value' => $rating->rating,
+                                ])
                             </td>
 
                             <td>

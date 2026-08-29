@@ -9,6 +9,7 @@ use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class StaffUserController extends Controller
@@ -79,13 +80,6 @@ class StaffUserController extends Controller
                 'unique:admins,email',
             ],
 
-            'profile_id' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:admins,profile_id',
-            ],
-
             'password' => [
                 'required',
                 'string',
@@ -114,10 +108,15 @@ class StaffUserController extends Controller
             $admin = Admin::create([
                 'name'       => $validated['name'],
                 'email'      => $validated['email'],
-                'profile_id' => $validated['profile_id'],
+                // The column is currently non-nullable, so use a unique
+                // temporary value until the auto-increment ID is available.
+                'profile_id' => 'pending-' . Str::uuid(),
                 'password'   => $validated['password'],
                 'status'     => true,
             ]);
+
+            $admin->profile_id = $this->generateProfileId($admin->id);
+            $admin->save();
 
             /*
              * Assign role
@@ -182,14 +181,6 @@ class StaffUserController extends Controller
                     ->ignore($admin->id),
             ],
 
-            'profile_id' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('admins', 'profile_id')
-                    ->ignore($admin->id),
-            ],
-
             'password' => [
                 'nullable',
                 'string',
@@ -217,7 +208,6 @@ class StaffUserController extends Controller
 
             $admin->name = $validated['name'];
             $admin->email = $validated['email'];
-            $admin->profile_id = $validated['profile_id'];
 
             /*
              * Only change password if supplied.
@@ -246,6 +236,14 @@ class StaffUserController extends Controller
         return redirect()
             ->route('admin.staff-users.index')
             ->with('success', 'Staff user updated successfully.');
+    }
+
+    /**
+     * Build a stable staff profile ID from the admins table auto-increment ID.
+     */
+    private function generateProfileId(int $adminId): string
+    {
+        return 'ADM' . str_pad((string) $adminId, 4, '0', STR_PAD_LEFT);
     }
 
     /**

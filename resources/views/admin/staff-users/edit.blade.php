@@ -96,16 +96,13 @@
 
                             <input
                                 type="text"
-                                name="profile_id"
-                                class="form-control @error('profile_id') is-invalid @enderror"
-                                value="{{ old('profile_id', $admin->profile_id) }}"
-                                required>
+                                class="form-control"
+                                value="{{ $admin->profile_id }}"
+                                readonly>
 
-                            @error('profile_id')
-                            <div class="invalid-feedback">
-                                {{ $message }}
+                            <div class="form-text">
+                                Profile IDs are generated automatically.
                             </div>
-                            @enderror
 
                         </div>
 

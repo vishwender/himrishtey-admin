@@ -137,38 +137,6 @@
                             </div>
 
 
-                            {{-- Profile ID --}}
-                            <div class="col-md-6">
-
-                                <label for="profile_id"
-                                    class="form-label">
-
-                                    Profile ID
-                                    <span class="text-danger">*</span>
-
-                                </label>
-
-                                <input type="text"
-                                    id="profile_id"
-                                    name="profile_id"
-                                    value="{{ old('profile_id') }}"
-                                    class="form-control @error('profile_id') is-invalid @enderror"
-                                    placeholder="e.g. ADMIN001"
-                                    required>
-
-                                <div class="form-text">
-                                    Unique identifier for this staff member.
-                                </div>
-
-                                @error('profile_id')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-
-                            </div>
-
-
                             {{-- Password --}}
                             <div class="col-md-6">
 
